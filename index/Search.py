@@ -26,11 +26,14 @@ def Search(I, minecraftdoor):
         addr = bytes(addr ^ Kw for addr, Kw in zip(addr, cycle(Kw))) #addr xor Kw
         k = bytes(k ^ Kw for k, Kw in zip(k, cycle(Kw))) #k xor Kw
         print('retrieve addr:', addr)
+        print('real address:', int.from_bytes(addr,'big'))
         print('retrieve k:', k)
 
         # Decrypt linkedlist L with first node A[a] encrypted under key k
         # Decrypt all nodes from address
         print('decrypt addr (WIP)')
+        
+
         # addressDegenerator = PsiCipher.decryptor()
         # decaddr = addressDegenerator.decrypt((1).to_bytes(16, "big"))
         # print(decaddr)
