@@ -10,7 +10,8 @@ from CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction, get
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
 from CreateDictionary import GetKeyAtValue
-
+import sys
+from itertools import cycle
 
 
 keyLength = 256
@@ -38,16 +39,18 @@ def BuildIndex(W,n,K):
 
     for i in range(1, n+1):
 
+        keyword = GetKeyAtValue(W, i) # get keyword
+        print('at keyword:', keyword)
+
         #create linked list
         kHead = os.urandom(keyLength // 8) #initialize the ki,0 and the address of n1,j
         addressGenerator = PsiCipher.encryptor((1).to_bytes(16, "big"))
         head = addressGenerator.encrypt(ctr.to_bytes(16, "big"))
+        print('append addr:',head)
+        print('with key:',kHead,'\n')
         storage.append((head, kHead)) # store these for later use
 
-        keyword = GetKeyAtValue(W, i) # get keyword
-
         # Traverse ids (vals) of keywords
-        # print('at keyword:', keyword)
         for j in range(len(W[keyword])):
 
             if W[keyword][j] in ids: # check if id already traversed
@@ -90,16 +93,23 @@ def BuildIndex(W,n,K):
     # Look up table T creation
     T = {} # unsecure lookup table ! should use a secure table like cuckoo table
     for i in range(1, n+1):
-        (addr, k) = storage[i-1] #heads of nodes
-        keyword = GetKeyAtValue(W, i)
-        val = phiFunction(keyPhi, keyword)
+        keyword = GetKeyAtValue(W, i) #retrieve keyword
+        Ki = phiFunction(keyPhi, keyword) #get key Ki
         # print('encrypt keyword:', keyword)
 
-        value = get_xor(addr + k, val)
+        (addr, k) = storage[i-1] #retrieve addr and k of node
+        # print('get addr:', addr, 'of type', type(addr))
+        # print('get k:', k, 'of type', type(k))
+        # print('get Ki', Ki, 'of type', type(Ki))
+
+        # value = get_xor(addr + k, Ki) # combine addr+k, xor with val
+        addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
+        k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
+
         if keyword in T:
-            T[keyword].append(value) # add to value list of keyword
+            T[keyword].append(addr, k) # add to value list of keyword
         else:
-            T[keyword] = [value] # create new value list for keyword
+            T[keyword] = [(addr, k)] # create new value list for keyword
     
     # print('table:')
     # print(T)

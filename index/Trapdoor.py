@@ -7,7 +7,7 @@ def ExtractKeywords(sql):
     output = sqlparse.format(sql, reindent=True)
     # print(output)
     tokens = sqlparse.parse(sql)
-    print(tokens[0].tokens)
+    # print('Tokens:',tokens[0].tokens)
     for token in tokens[0].tokens:
         if(isinstance(token, sqlparse.sql.Where)):
             temp = ""
@@ -22,8 +22,8 @@ def ExtractKeywords(sql):
                         
                 i = i + 1
             # print(token.token_next(1)[1])
-            print("output: ",temp)
-            print("comparisons:", temp.split("AND"))
+            # print("output: ",temp)
+            # print("comparisons:", temp.split("AND"))
             return temp.split("AND")
             # nextToken = token.token_next(1)
             # print('Occurrances',nextToken)
@@ -32,12 +32,16 @@ def ExtractKeywords(sql):
         # print("\nstuff", token)
 
 def generateTrapdoor(sql, K):
+    print('input SQL:', sql)
     keywords = ExtractKeywords(sql)
+    # print('extract keywords:', keywords)
     # AESSIVEncryptNonce(K, keywords[0])
     trapdoors = []
     for keyword in keywords:
+        print('at keyword:', keyword)
         pos = keyword
         kW = phiFunction(K, keyword)
+        print('pos=',pos, '| Kw=',kW)
         trapdoors.append((pos, kW.hex()))
     return trapdoors
     

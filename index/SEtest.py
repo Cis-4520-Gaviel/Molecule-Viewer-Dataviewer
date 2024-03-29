@@ -61,12 +61,12 @@ db.create_tables()
 db.conn.execute( """INSERT
                     INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
                     VALUES ('Fire', 1, 1);""" )
-db.conn.execute( """INSERT
-                    INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
-                    VALUES ('Water', 2, 1);""" )
-db.conn.execute( """INSERT
-                    INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
-                    VALUES ('Snow', 3, 2);""" )
+# db.conn.execute( """INSERT
+#                     INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
+#                     VALUES ('Water', 2, 1);""" )
+# db.conn.execute( """INSERT
+#                     INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
+#                     VALUES ('Snow', 3, 2);""" )
 # print('Dataset:', db.retrieve_all('Molecules'))
 
 
@@ -84,19 +84,21 @@ print('Completed CreateDictionary!\n\n')
 # Test BuildIndex
 print('Testing BuildIndex...')
 I = BuildIndex(W,n,0)
-print(I)
+# print(I)
 print('Completed BuildIndex!\n\n')
 
 
 # Test Trapdoor
 print('Testing Trapdoor...')
-T = generateTrapdoor("""SELECT * FROM Molecules WHERE NAME='fire';""",os.urandom(16))
+# An example SQL statement
+minecraftdoor = generateTrapdoor("""SELECT * FROM Molecules WHERE NAME='Fire';""",os.urandom(16))
+print(minecraftdoor)
 print('Completed Trapdoor!\n\n')
 
 
 # Test Search
 print('Testing Search...')
-Q = Search(I,T)
+Q = Search(I,minecraftdoor)
 print('Completed Search!\n\n')
 
 
