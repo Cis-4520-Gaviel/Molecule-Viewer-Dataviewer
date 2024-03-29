@@ -1,4 +1,6 @@
 from itertools import cycle
+from cryptography.hazmat.primitives.ciphers.aead import AESSIV
+import os
 
 # Search over the search index I using the search token generated with
 # algorithm Trapdoor
@@ -15,6 +17,8 @@ def Search(I, minecraftdoor):
     theta = T[pos]
     # print('value:',theta)
 
+    R = [] # keeping track of record ids
+
     # Parse a||k = theta xor Kw (for each node)
     for node in theta:
         (addr, k) = node #retrieve addr and k of node
@@ -25,21 +29,20 @@ def Search(I, minecraftdoor):
         # print(type(addr), type(Kw))
         addr = bytes(addr ^ Kw for addr, Kw in zip(addr, cycle(Kw))) #addr xor Kw
         k = bytes(k ^ Kw for k, Kw in zip(k, cycle(Kw))) #k xor Kw
-        print('retrieve addr:', addr)
-        print('real address:', int.from_bytes(addr,'big'))
-        print('retrieve k:', k)
+        # print('retrieve addr:', addr)
+        # print('real address:', int.from_bytes(addr,'big'))
+        # print('retrieve k:', k)
 
         # Decrypt linkedlist L with first node A[a] encrypted under key k
         # Decrypt all nodes from address
-        print('decrypt addr (WIP)')
-        
+        aessiv = AESSIV(k) #decrypting each node with non deterministic encryptor
+        ct = A[int.from_bytes(addr, 'big')] # retrieve ct
+        print('encrypted node:', ct)
+        node = aessiv.decrypt(ct, None)
+        print('decrypted node:',node.decode().split(' '))
 
-        # addressDegenerator = PsiCipher.decryptor()
-        # decaddr = addressDegenerator.decrypt((1).to_bytes(16, "big"))
-        # print(decaddr)
+        R.append(node.decode().split(' ')[0]) # add record id to list
 
-    # Output each decrypted record ID!
-    result = 0
-    return result # return encrypted records that match search criterion w
+    return R # return encrypted records that match search criterion w
 
 

@@ -1,16 +1,10 @@
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, CipherContext, aead;
-from cryptography.hazmat.primitives import padding, hashes;
 import os
 from Node import Node
 from AESCTR import AESCTR
-from AESGCM import AESGCM
-from NonceCipherContext import NonceDecryptContext, NonceEncryptContext
 from cuckoopy import CuckooFilter
 from CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction, get_xor
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
 from CreateDictionary import GetKeyAtValue
-import sys
 from itertools import cycle
 
 mockVal = bytes('aa', 'utf-8')
@@ -78,10 +72,10 @@ def BuildIndex(W,n,K,Klen):
             node = Node(id, kNext, addrNext)
 
             # Encrypt current node (N'ij) using prev key
-            aessiv = aead.AESSIV(kHead) #encrypting each node with non deterministic encryptor
-            nonce = os.urandom(16)      #generating a 128-bit nonce
-            print('encrypt node:',node)
-            ct = nonce + aessiv.encrypt(bytes(str(node),'utf-8'), [nonce]) #use AESSIV for undeterministic symmetric encryption
+            aessiv = AESSIV(kHead) #encrypting each node with non deterministic encryptor
+            # nonce = os.urandom(16)      #generating a 128-bit nonce
+            print('encrypt node:',node,'of type',type(node))
+            ct = aessiv.encrypt(bytes(str(node),'utf-8'), None) #use AESSIV for undeterministic symmetric encryption
 
             # if(A[nodeIndex] is not None): # debugging, print if we have a collision
             #     print('Debug: Collision found')
@@ -125,11 +119,9 @@ def BuildIndex(W,n,K,Klen):
         else:
             T[keyword] = [(addr, k)] # create new value list for keyword
     
-    print('table (values will appear different because of XOR):')
-    print(T)
-    # print('A:')
-    # print(A)
+    
     I = (A, T)
+
     return I
 
 

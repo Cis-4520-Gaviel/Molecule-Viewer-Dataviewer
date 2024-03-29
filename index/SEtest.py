@@ -38,6 +38,11 @@ print('Completed CreateDictionary!\n\n')
 print('Testing BuildIndex...')
 I = BuildIndex(W,n,K,Klen)
 # print(I)
+# (A,T) = I
+# print('A:')
+# print(A)
+# print('table (values will appear different because of XOR):')
+# print(T)
 print('Completed BuildIndex!\n\n')
 
 
@@ -51,7 +56,8 @@ print('Completed Trapdoor!\n\n')
 
 # Test Search
 print('Testing Search...')
-Q = Search(I,minecraftdoor)
+R = Search(I,minecraftdoor)
+print('retrieved record ids:',R)
 print('Completed Search!\n\n')
 
 
