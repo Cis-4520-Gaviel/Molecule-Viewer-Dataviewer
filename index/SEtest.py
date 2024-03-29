@@ -1,64 +1,14 @@
-import os
-import sqlite3
+from Database import *
+from KeyGen import *
 from CreateDictionary import *
 from BuildIndex import *
 from Trapdoor import *
 from Search import *
 
-# Class to support database operations
-class Database:
-
-    # Constructor
-    def __init__(self, reset=False):
-        if reset == True and os.path.exists('molecules.db'):
-            os.remove('molecules.db')
-        self.conn = sqlite3.connect('molecules.db')
-
-    # This method creates tables
-    def create_tables(self):
-        self.conn.execute("""CREATE TABLE IF NOT EXISTS Molecules 
-                        (   NAME            TEXT            NOT NULL,
-                            ATOM_NO         INTEGER         NOT NULL,
-                            BOND_NO         INTEGER         NOT NULL)""")
-        # Commit transaction
-        self.conn.commit()
-
-    # This method adds a molecule to the Molecules table
-    def add_molecule(self, name, atom_no, bond_no):
-        self.conn.execute("""INSERT OR IGNORE
-                            INTO Molecules (NAME, ATOM_NO, BOND_NO)
-                            VALUES ('%s', %s, %s)""" % (name, atom_no, bond_no))
-        # Commit transaction
-        self.conn.commit()
-    
-    # This method retrieves all entries from a table
-    def retrieve_all(self, table):
-        entries = self.conn.execute("SELECT * FROM %s" % table).fetchall()
-        return entries
-    
-    # This method checks if an entry already exists within a table
-    def check_entry(self, table, attribute, entry):
-        val = self.conn.execute("""SELECT EXISTS(SELECT 1 FROM %s WHERE %s.%s='%s')""" % (table, table, attribute, entry)).fetchall()
-        exists = int(val[0][0])
-        return exists
-    
-    # This method deletes an entry from a table
-    def delete_entry(self, table, attribute, entry):
-        self.conn.execute("DELETE from %s WHERE %s.%s='%s'" % (table, table, attribute, entry))
-        # Commit transaction
-        self.conn.commit()
-
-    def getAttributes(self):
-        cur = self.conn.execute("SELECT * FROM Molecules")
-        attr = list(map(lambda x: x[0], cur.description))
-        return attr
-
-
-
 # Create test database
-db = Database(reset=True)
-db.create_tables()
-db.conn.execute( """INSERT
+D = Database(reset=True)
+D.create_tables()
+D.conn.execute( """INSERT
                     INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
                     VALUES ('Fire', 1, 1);""" )
 # db.conn.execute( """INSERT
@@ -69,10 +19,13 @@ db.conn.execute( """INSERT
 #                     VALUES ('Snow', 3, 2);""" )
 # print('Dataset:', db.retrieve_all('Molecules'))
 
+# Create keys
+Klen = 256
+K = KeyGen(Klen) # K = (Kpsi, Kpi, Kphi)
 
 # Test CreateDictionary
 print('Testing CreateDictionary...')
-W, n = CreateDictionary(db)
+W, n = CreateDictionary(D)
 print(W)
 # print('Indexing...')
 # for i in range(1, n+1):
@@ -83,7 +36,7 @@ print('Completed CreateDictionary!\n\n')
 
 # Test BuildIndex
 print('Testing BuildIndex...')
-I = BuildIndex(W,n,0)
+I = BuildIndex(W,n,K,Klen)
 # print(I)
 print('Completed BuildIndex!\n\n')
 
@@ -91,7 +44,7 @@ print('Completed BuildIndex!\n\n')
 # Test Trapdoor
 print('Testing Trapdoor...')
 # An example SQL statement
-minecraftdoor = generateTrapdoor("""SELECT * FROM Molecules WHERE NAME='Fire';""",os.urandom(16))
+minecraftdoor = generateTrapdoor("""SELECT * FROM Molecules WHERE NAME='Fire';""",K)
 print(minecraftdoor)
 print('Completed Trapdoor!\n\n')
 

@@ -32,6 +32,7 @@ def ExtractKeywords(sql):
         # print("\nstuff", token)
 
 def generateTrapdoor(sql, K):
+    (Kpsi, Kpi, Kphi) = K # retrieve keys
     print('input SQL:', sql)
     keywords = ExtractKeywords(sql)
     # print('extract keywords:', keywords)
@@ -40,9 +41,9 @@ def generateTrapdoor(sql, K):
     for keyword in keywords:
         print('at keyword:', keyword)
         pos = keyword
-        kW = phiFunction(K, keyword)
-        print('pos=',pos, '| Kw=',kW)
-        trapdoors.append((pos, kW.hex()))
+        Kw = phiFunction(Kphi, keyword) #get key Kw (same as Ki from lookuptable creation)
+        # print('get Kw', Kw, 'of type', type(Kw))
+        trapdoors.append((pos, Kw))
     return trapdoors
     
 

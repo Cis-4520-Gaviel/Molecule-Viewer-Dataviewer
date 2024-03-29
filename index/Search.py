@@ -1,6 +1,4 @@
-from CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction, get_xor
 from itertools import cycle
-from BuildIndex import keyPhi
 
 # Search over the search index I using the search token generated with
 # algorithm Trapdoor
@@ -17,22 +15,25 @@ def Search(I, minecraftdoor):
     theta = T[pos]
     # print('value:',theta)
 
-    # Parse a||k = theta xor Kw
-    (addr, k) = theta[0] #retrieve addr and k of node
-    # print(addr)
-    # print(k)
-    Ki = phiFunction(keyPhi, pos) #get key Ki (pos=keyword)
-    addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
-    k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
-    print('retrieve addr:', addr)
-    print('retrieve k:', k)
+    # Parse a||k = theta xor Kw (for each node)
+    for node in theta:
+        (addr, k) = node #retrieve addr and k of node
+        # print(addr)
+        # print(k)
 
-    # Decrypt linkedlist L with first node A[a] encrypted under key k
-    # Decrypt all nodes from address
-    print('decrypt addr (WIP)')
-    # addressDegenerator = PsiCipher.decryptor()
-    # decaddr = addressDegenerator.decrypt((1).to_bytes(16, "big"))
-    # print(decaddr)
+        # T[pos] (theta split into addr and k) xor Kw
+        # print(type(addr), type(Kw))
+        addr = bytes(addr ^ Kw for addr, Kw in zip(addr, cycle(Kw))) #addr xor Kw
+        k = bytes(k ^ Kw for k, Kw in zip(k, cycle(Kw))) #k xor Kw
+        print('retrieve addr:', addr)
+        print('retrieve k:', k)
+
+        # Decrypt linkedlist L with first node A[a] encrypted under key k
+        # Decrypt all nodes from address
+        print('decrypt addr (WIP)')
+        # addressDegenerator = PsiCipher.decryptor()
+        # decaddr = addressDegenerator.decrypt((1).to_bytes(16, "big"))
+        # print(decaddr)
 
     # Output each decrypted record ID!
     result = 0

@@ -13,29 +13,23 @@ from CreateDictionary import GetKeyAtValue
 import sys
 from itertools import cycle
 
-
-keyLength = 256
-kStuff = 1
-keyPsi = os.urandom(256//8)
-keyPhi = aead.AESSIV.generate_key(256)
 mockVal = bytes('aa', 'utf-8')
-
-
 
 GCMIV = os.urandom(12)
 
 # Generate a search index I
-def BuildIndex(W,n,K):
+def BuildIndex(W,n,K,Klen):
 
     ctr = 1 # Set global counter
 
     m = 100
     A = [None] * m # Array A creation
 
+    (Kpsi, Kpi, Kphi) = K # retrieve keys
     storage = [] # keeping track of each linked list head (address and key)
     ids = [] # keeping track of traversed ids
     
-    PsiCipher = AESCTR(keyPsi) # cipher for the PRP we use for ordering the array elements
+    PsiCipher = AESCTR(Kpsi) # cipher for the PRP we use for ordering the array elements
 
     for i in range(1, n+1):
 
@@ -43,7 +37,7 @@ def BuildIndex(W,n,K):
         print('at keyword:', keyword)
 
         #create linked list
-        kHead = os.urandom(keyLength // 8) #initialize the ki,0 and the address of n1,j
+        kHead = os.urandom(Klen // 8) #initialize the ki,0 and the address of n1,j
         addressGenerator = PsiCipher.encryptor((1).to_bytes(16, "big"))
         head = addressGenerator.encrypt(ctr.to_bytes(16, "big"))
         print('append addr:',head)
@@ -58,7 +52,7 @@ def BuildIndex(W,n,K):
                 continue
             
             # print('encrypt id:', W[keyword][j], 'from j index', j, '\n')
-            kNext = os.urandom(keyLength // 8) # generate key ki,j to decrypt next node
+            kNext = os.urandom(Klen // 8) # generate key ki,j to decrypt next node
             node = Node(W[keyword][j], kNext, ctr+1) #create node with record id, key, and address in A of node
             ids.append(W[keyword][j])
 
@@ -94,7 +88,7 @@ def BuildIndex(W,n,K):
     T = {} # unsecure lookup table ! should use a secure table like cuckoo table
     for i in range(1, n+1):
         keyword = GetKeyAtValue(W, i) #retrieve keyword
-        Ki = phiFunction(keyPhi, keyword) #get key Ki
+        Ki = phiFunction(Kphi, keyword) #get key Ki
         # print('encrypt keyword:', keyword)
 
         (addr, k) = storage[i-1] #retrieve addr and k of node
