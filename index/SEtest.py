@@ -11,13 +11,13 @@ D.create_tables()
 D.conn.execute( """INSERT
                     INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
                     VALUES ('Fire', 1, 1);""" )
-# db.conn.execute( """INSERT
-#                     INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
-#                     VALUES ('Water', 2, 1);""" )
-# db.conn.execute( """INSERT
-#                     INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
-#                     VALUES ('Snow', 3, 2);""" )
-# print('Dataset:', db.retrieve_all('Molecules'))
+D.conn.execute( """INSERT
+                    INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
+                    VALUES ('Water', 2, 1);""" )
+D.conn.execute( """INSERT
+                    INTO Molecules (NAME,  ATOM_NO,    BOND_NO)
+                    VALUES ('Snow', 3, 2);""" )
+print('Dataset:', D.retrieve_all('Molecules'))
 
 # Create keys
 Klen = 256
@@ -48,8 +48,12 @@ print('Completed BuildIndex!\n\n')
 
 # Test Trapdoor
 print('Testing Trapdoor...')
-# An example SQL statement
-minecraftdoor = generateTrapdoor("""SELECT * FROM Molecules WHERE NAME='Fire';""",K)
+# Example SQL statements (only uncomment one)
+# sql = """SELECT * FROM Molecules WHERE NAME='Fire';"""
+# sql = """SELECT * FROM Molecules WHERE NAME='Water';"""
+# sql = """SELECT * FROM Molecules WHERE NAME='Snow';"""
+sql = """SELECT * FROM Molecules WHERE BOND_NO='1';"""
+minecraftdoor = generateTrapdoor(sql,K)
 print(minecraftdoor)
 print('Completed Trapdoor!\n\n')
 

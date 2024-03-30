@@ -39,7 +39,7 @@ def generateTrapdoor(sql, K):
     # AESSIVEncryptNonce(K, keywords[0])
     trapdoors = []
     for keyword in keywords:
-        print('at keyword:', keyword)
+        print('extract keyword:', keyword)
         pos = keyword
         Kw = phiFunction(Kphi, keyword) #get key Kw (same as Ki from lookuptable creation)
         # print('get Kw', Kw, 'of type', type(Kw))

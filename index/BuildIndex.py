@@ -50,7 +50,7 @@ def BuildIndex(W,n,K,Klen):
             id = W[keyword][j] # retrieve record id
 
             if id in ids: # check if id already traversed
-                # print(W[keyword][j], 'already exists!\n')
+                print('id', W[keyword][j], 'already exists!\n')
                 continue
             else:
                 ids.append(id)
@@ -60,11 +60,11 @@ def BuildIndex(W,n,K,Klen):
 
             # if not last node in list, generate address of next node using key Kpsi
             if(j != len(W[keyword]) - 1):
+                print('gen address for next node')
                 psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
                 psiCtr = psuedoRandomPerm.encrypt((ctr + 1).to_bytes(16, "big"))
                 addrNext = int.from_bytes(psiCtr, 'big') % m
                 # node.setNextAddress(psiCtr)
-                print('new address gen!')
             else:
                 addrNext = None # last node
 
@@ -74,7 +74,7 @@ def BuildIndex(W,n,K,Klen):
             # Encrypt current node (N'ij) using prev key
             aessiv = AESSIV(kHead) #encrypting each node with non deterministic encryptor
             # nonce = os.urandom(16)      #generating a 128-bit nonce
-            print('encrypt node:',node,'of type',type(node))
+            print('encrypt node:',node)
             ct = aessiv.encrypt(bytes(str(node),'utf-8'), None) #use AESSIV for undeterministic symmetric encryption
 
             # if(A[nodeIndex] is not None): # debugging, print if we have a collision
@@ -82,7 +82,7 @@ def BuildIndex(W,n,K,Klen):
 
             # Store node in A (pseudorandom order)
             A[addrHead] = ct
-            print('store encrypted node at address', addrHead, 'with val', ct)
+            print('store encrypted node at address', addrHead)
             # print('A:', A)
 
             # store current node info (address in A, key) for lookuptable
@@ -98,28 +98,43 @@ def BuildIndex(W,n,K,Klen):
 
     # Look up table T creation
     T = {} # unsecure lookup table ! should use a secure table like cuckoo table
+    ids = [] # reset traversed ids
+    nodeIndex = 0
     # TODO: store info in T in pseudorandom order using key Kpi
     for i in range(1, n+1):
         keyword = GetKeyAtValue(W, i) #retrieve keyword
-        Ki = phiFunction(Kphi, keyword) #get key Ki
         # print('encrypt keyword:', keyword)
 
-        (addr, k) = nodes[i-1] #retrieve addr in A and k of node
-        # print('get addr:', addr, 'of type', type(addr))
-        # print('real address:', int.from_bytes(addr,'big'))
-        # print('get k:', k, 'of type', type(k))
-        # print('get Ki', Ki, 'of type', type(Ki))
+        # Traverse ids (vals) of keywords
+        for j in range(len(W[keyword])):
+            id = W[keyword][j] # retrieve record id
 
-        # value = get_xor(addr + k, Ki) # combine addr+k, xor with val
-        addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
-        k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
+            if id in ids: # check if id already traversed
+                # print('id', W[keyword][j], 'already exists!\n')
+                continue
+            else:
+                ids.append(id)
 
-        if keyword in T:
-            T[keyword].append(addr, k) # add to value list of keyword
-        else:
-            T[keyword] = [(addr, k)] # create new value list for keyword
+            Ki = phiFunction(Kphi, keyword) #get key Ki
+
+            (addr, k) = nodes[nodeIndex] #retrieve addr in A and k of node
+            # print('get addr:', addr, 'of type', type(addr))
+            # print('real address:', int.from_bytes(addr,'big'))
+            # print('get k:', k, 'of type', type(k))
+            # print('get Ki', Ki, 'of type', type(Ki))
+
+            # value = get_xor(addr + k, Ki) # combine addr+k, xor with val
+            addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
+            k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
+
+            if keyword in T:
+                T[keyword].append((addr, k)) # add to value list of keyword
+            else:
+                T[keyword] = [(addr, k)] # create new value list for keyword
+            
+            nodeIndex = nodeIndex+1
     
-    
+
     I = (A, T)
 
     return I

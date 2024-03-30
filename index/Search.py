@@ -37,7 +37,7 @@ def Search(I, minecraftdoor):
         # Decrypt all nodes from address
         aessiv = AESSIV(k) #decrypting each node with non deterministic encryptor
         ct = A[int.from_bytes(addr, 'big')] # retrieve ct
-        print('encrypted node:', ct)
+        # print('encrypted node:', ct)
         node = aessiv.decrypt(ct, None)
         print('decrypted node:',node.decode().split(' '))
 
