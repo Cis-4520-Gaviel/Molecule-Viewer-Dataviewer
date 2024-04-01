@@ -12,7 +12,7 @@ def ExtractKeywords(sql):
     output = sqlparse.format(sql, reindent=True)
     # print(output)
     tokens = sqlparse.parse(sql)
-    print(tokens[0].tokens)
+    # print('Tokens:',tokens[0].tokens)
     for token in tokens[0].tokens:
         if(isinstance(token, sqlparse.sql.Where)):
             temp = ""
@@ -27,8 +27,8 @@ def ExtractKeywords(sql):
                         
                 i = i + 1
             # print(token.token_next(1)[1])
-            print("output: ",temp)
-            print("comparisons:", temp.split("AND"))
+            # print("output: ",temp)
+            # print("comparisons:", temp.split("AND"))
             return temp.split("AND")
             # nextToken = token.token_next(1)
             # print('Occurrances',nextToken)
@@ -37,16 +37,21 @@ def ExtractKeywords(sql):
         # print("\nstuff", token)
 
 def generateTrapdoor(sql, K):
+    (Kpsi, Kpi, Kphi) = K # retrieve keys
+    print('input SQL:', sql)
     """
     generates an array of trapdoors from a select sql statement containing one or more queries
     """
     keywords = ExtractKeywords(sql)
+    # print('extract keywords:', keywords)
     # AESSIVEncryptNonce(K, keywords[0])
     trapdoors = []
     for keyword in keywords:
+        print('extract keyword:', keyword)
         pos = keyword
-        kW = phiFunction(K, keyword)
-        trapdoors.append((pos, kW.hex()))
+        Kw = phiFunction(Kphi, keyword) #get key Kw (same as Ki from lookuptable creation)
+        # print('get Kw', Kw, 'of type', type(Kw))
+        trapdoors.append((pos, Kw))
     return trapdoors
     
 

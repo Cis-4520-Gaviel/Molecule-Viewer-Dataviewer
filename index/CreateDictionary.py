@@ -15,7 +15,7 @@ def CreateDictionary(D):
         # print('cur record:', record)
         for attribute in allAttributes:
             # print('cur attr:', attribute)
-            keyword = attribute + '=' + str(record[i]) # create keyword from record
+            keyword = attribute + '=\'' + str(record[i]) + '\'' # create keyword from record
             if keyword in W:
                 W[keyword].append(id) # add to id list of keyword
             else:
