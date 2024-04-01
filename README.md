@@ -12,6 +12,45 @@ The front end was built using
 - `ReactJS`
 - `node`
 
+### Installing pypbc
+
+first download pbc-0.5.14.tar.gz [here](https://crypto.stanford.edu/pbc/download.html)
+
+And clone pypbc repository [github](https://github.com/debatem1/pypbc/tree/master)
+
+extract the .tar file into the ubuntu system.
+navigate to /pbc-0.5.14
+
+```bash
+chmod +x configure
+sudo sh
+	./configure --prefix=/usr --enable-shared
+	make
+	sudo make install
+```
+
+You might need to rebuild the search path for libraries:
+
+```
+sudo ldconfig
+```
+
+If this fails, you can run these following lines to fix the issue
+
+```bash
+cd /usr/lib/wsl/lib
+sudo rm libcuda.so
+sudo rm libcuda.so.1
+sudo ln -s libcuda.so.1.1 libcuda.so
+sudo ln -s libcuda.so.1.1 libcuda.so.1
+```
+
+Then navigate to pypbc and run
+
+```
+sudo pip3 install .
+```
+
 ## Running
 
 There are two sections of code that will be needed to execute to run the full stack.
