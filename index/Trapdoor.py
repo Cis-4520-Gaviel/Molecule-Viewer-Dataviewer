@@ -3,6 +3,11 @@ from CryptoUtils import AESSIVEncryptNonce, phiFunction, get_xor
 import os
 
 def ExtractKeywords(sql):
+    """
+    This basically extracts the search keywords out of an sql statement. 
+    DO NOT supply statements which do not contain statements
+    """
+
     # print(sql)
     output = sqlparse.format(sql, reindent=True)
     # print(output)
@@ -32,6 +37,9 @@ def ExtractKeywords(sql):
         # print("\nstuff", token)
 
 def generateTrapdoor(sql, K):
+    """
+    generates an array of trapdoors from a select sql statement containing one or more queries
+    """
     keywords = ExtractKeywords(sql)
     # AESSIVEncryptNonce(K, keywords[0])
     trapdoors = []
