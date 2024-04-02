@@ -12,30 +12,17 @@ The front end was built using
 - `ReactJS`
 - `node`
 
-### Installing pypbc
+## Cryptosystem
 
-first download pbc-0.5.14.tar.gz [here](https://crypto.stanford.edu/pbc/download.html)
+Built on Ubuntu 22.04.3 LTS
 
-And clone pypbc repository [github](https://github.com/debatem1/pypbc/tree/master)
+- [cryptography](https://pypi.org/project/cryptography/)
+- [pymcl](https://github.com/Jemtaly/pymcl)
+- [otc](https://pypi.org/project/otc/)
 
-extract the .tar file into the ubuntu system.
-navigate to /pbc-0.5.14
+### Installing pymcl
 
-```bash
-chmod +x configure
-sudo sh
-	./configure --prefix=/usr --enable-shared
-	make
-	sudo make install
-```
-
-You might need to rebuild the search path for libraries:
-
-```
-sudo ldconfig
-```
-
-If this fails, you can run these following lines to fix the issue
+Configure
 
 ```bash
 cd /usr/lib/wsl/lib
