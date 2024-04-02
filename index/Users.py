@@ -13,6 +13,10 @@ class User(ABC):
         self.DH = dataHost
 
 class Writer(User):
+    """
+    Writer user that interacts with the Gaviel scheme. Contains a single symmetric key
+    Has the ability to delegate authorizations to readers, and encrypt a database
+    """
     def _setup(self):
         secretKey = Fr.random()
         return secretKey
@@ -22,6 +26,9 @@ class Writer(User):
         super().__init__(queryMultiplexer, dataHost)
 
     def delegate(self, readerPublicKey: Fr):
+        """
+        Authorize a reader via their public key
+        """
         auth = readerPublicKey * self._secretKey
         #send to QM
         return auth
@@ -34,6 +41,10 @@ class Writer(User):
     #database
 
 class Reader(User):
+    """
+    A reader user in the Gaviel scheme. Has a pair of private and public keys, as well as
+    a symmetric key for transforming their search queries (trapdoors)
+    """
     def _setup(self):
         privateKey = Fr.random()
         publicKey = g2 * ~privateKey
@@ -47,7 +58,7 @@ class Reader(User):
         self._kR = kR
         super().__init__(queryMultiplexer, dataHost)
 
-    def getPublicKey(self):
+    def getPublicKey(self) -> Fr:
         return self._publicKey
     
     def trapdoor(self, sqlStatement):

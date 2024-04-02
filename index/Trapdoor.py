@@ -6,7 +6,7 @@ import os
 def ExtractKeywords(sql):
     """
     This basically extracts the search keywords out of an sql statement. 
-    DO NOT supply statements which do not contain statements
+    DO NOT supply statements which do not contain statements. There is no error handling currently
     """
 
     # print(sql)
@@ -38,11 +38,11 @@ def ExtractKeywords(sql):
         # print("\nstuff", token)
 
 def generateTrapdoor(sql, K):
-    (Kpsi, Kpi, Kphi) = K # retrieve keys
-    print('input SQL:', sql)
     """
     generates an array of trapdoors from a select sql statement containing one or more queries
     """
+    (Kpsi, Kpi, Kphi) = K # retrieve keys
+    print('input SQL:', sql)
     keywords = ExtractKeywords(sql)
     # print('extract keywords:', keywords)
     # AESSIVEncryptNonce(K, keywords[0])
@@ -56,11 +56,11 @@ def generateTrapdoor(sql, K):
     return trapdoors
     
 def generateTrapdoorBLS12381(sql, privKey):
-    # (Kpsi, Kpi, Kphi) = K # realistically we would be generating our own curve, but for this case we use the predefined ones
-    print('input SQL:', sql)
     """
     generates an array of trapdoors from a select sql statement containing one or more queries
     """
+    # (Kpsi, Kpi, Kphi) = K # realistically we would be generating our own curve, but for this case we use the predefined ones
+    print('input SQL:', sql)
     keywords = ExtractKeywords(sql)
     # print('extract keywords:', keywords)
     # AESSIVEncryptNonce(K, keywords[0])
