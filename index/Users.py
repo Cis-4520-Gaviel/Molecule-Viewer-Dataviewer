@@ -25,7 +25,8 @@ class Writer(User):
         auth = readerPublicKey * self._secretKey
         #send to QM
 
-    
+    def encrypt(self, index):
+        yield Exception("not implemented yet")
     #database
 
 class Reader(User):
