@@ -13,6 +13,11 @@ GCMIV = os.urandom(12)
 
 # Generate a search index I
 def BuildIndex(W,n,K,Klen):
+    """
+    Kpsi is used to generate addresses, key for PRP
+    Kpi is used for address of lookup table, key for PRP
+    Kphi is used to encrypt values, key for PRF
+    """
 
     ctr = 1 # Set global counter
 
