@@ -1,5 +1,6 @@
 import sqlparse
 from CryptoUtils import AESSIVEncryptNonce, phiFunction, get_xor
+from pymcl import g1, pairing
 import os
 
 def ExtractKeywords(sql):
@@ -52,6 +53,25 @@ def generateTrapdoor(sql, K):
         Kw = phiFunction(Kphi, keyword) #get key Kw (same as Ki from lookuptable creation)
         # print('get Kw', Kw, 'of type', type(Kw))
         trapdoors.append((pos, Kw))
+    return trapdoors
+    
+def generateTrapdoorBLS12381(sql, privKey):
+    # (Kpsi, Kpi, Kphi) = K # realistically we would be generating our own curve, but for this case we use the predefined ones
+    print('input SQL:', sql)
+    """
+    generates an array of trapdoors from a select sql statement containing one or more queries
+    """
+    keywords = ExtractKeywords(sql)
+    # print('extract keywords:', keywords)
+    # AESSIVEncryptNonce(K, keywords[0])
+    trapdoors = []
+    for keyword in keywords:
+        print('extract keyword:', keyword)
+        pos = keyword
+        Kw = g1.hash(bytes(keyword, 'utf-8')) #get key Kw (same as Ki from lookuptable creation)
+        encVal = Kw * privKey
+        # print('get Kw', Kw, 'of type', type(Kw))
+        trapdoors.append((pos, encVal))
     return trapdoors
     
 

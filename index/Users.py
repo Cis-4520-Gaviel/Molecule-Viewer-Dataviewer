@@ -1,7 +1,7 @@
 import os
-from pymcl import Fr, g1, g2
+from pymcl import Fr, g1, g2, pairing
 from abc import ABC, abstractmethod
-from Trapdoor import generateTrapdoor
+from Trapdoor import generateTrapdoor, generateTrapdoorBLS12381
 
 class User(ABC):
     @abstractmethod
@@ -19,14 +19,18 @@ class Writer(User):
 
     def __init__(self, queryMultiplexer, dataHost):
         self._secretKey = self._setup()
-        super(queryMultiplexer, dataHost)
+        super().__init__(queryMultiplexer, dataHost)
 
     def delegate(self, readerPublicKey: Fr):
         auth = readerPublicKey * self._secretKey
         #send to QM
+        return auth
 
     def encrypt(self, index):
         yield Exception("not implemented yet")
+
+    def encryptKeyword(self, keyword):
+        return pairing(g1.hash(bytes(keyword, 'utf-8')), g2 * self._secretKey)
     #database
 
 class Reader(User):
@@ -41,11 +45,12 @@ class Reader(User):
         self._publicKey = publicKey
         self._privateKey = privateKey
         self._kR = kR
-        super(queryMultiplexer, dataHost)
+        super().__init__(queryMultiplexer, dataHost)
 
     def getPublicKey(self):
         return self._publicKey
     
     def trapdoor(self, sqlStatement):
-        yield Exception("need to implement this")
-        generateTrapdoor(sqlStatement, 10) # nuh uh
+        test = generateTrapdoorBLS12381(sqlStatement, self._privateKey) # nuh uh
+        return test
+        # yield Exception("need to implement this")

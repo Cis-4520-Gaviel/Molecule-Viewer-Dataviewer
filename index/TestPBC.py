@@ -145,6 +145,7 @@ def TestAuthorizationSystem():
     indexHash = pymcl.pairing(keyword, g2 * writerSecretKey)
 
     transformation = pymcl.pairing(searchQuery * privateKey, authorization)
+    print(indexHash,"\n\n", transformation)
     print("Keys Match: ",indexHash == transformation)
     
 
