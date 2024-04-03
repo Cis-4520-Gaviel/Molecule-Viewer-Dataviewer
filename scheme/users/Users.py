@@ -2,15 +2,18 @@ import os
 from pymcl import Fr, g1, g2, pairing
 from abc import ABC, abstractmethod
 from Trapdoor import generateTrapdoor, generateTrapdoorBLS12381
+from ..database.QueryMultiplexer import QueryMutliplexer
+from ..database.DataHost import DataHost
 
 class User(ABC):
     @abstractmethod
     def _setup(self):
         pass
 
-    def __init__(self, queryMultiplexer, dataHost):
+    def __init__(self, queryMultiplexer : QueryMutliplexer, dataHost: DataHost, id: str):
         self.QM = queryMultiplexer
         self.DH = dataHost
+        self.id = id
 
 class Writer(User):
     """
@@ -21,9 +24,9 @@ class Writer(User):
         secretKey = Fr.random()
         return secretKey
 
-    def __init__(self, queryMultiplexer, dataHost):
+    def __init__(self, queryMultiplexer, dataHost, id):
         self._secretKey = self._setup()
-        super().__init__(queryMultiplexer, dataHost)
+        super().__init__(queryMultiplexer, dataHost, id)
 
     def delegate(self, readerPublicKey: Fr):
         """
@@ -51,12 +54,12 @@ class Reader(User):
         kR = os.urandom(8)
         return publicKey, privateKey, kR
 
-    def __init__(self, queryMultiplexer, dataHost):
+    def __init__(self, queryMultiplexer, dataHost, id):
         publicKey, privateKey, kR = self._setup()
         self._publicKey = publicKey
         self._privateKey = privateKey
         self._kR = kR
-        super().__init__(queryMultiplexer, dataHost)
+        super().__init__(queryMultiplexer, dataHost, id)
 
     def getPublicKey(self) -> Fr:
         return self._publicKey
