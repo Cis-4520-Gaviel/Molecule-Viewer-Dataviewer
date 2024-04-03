@@ -92,7 +92,7 @@ def parseInsertStatement(sqlStatement):
     # print(tokens[0])
     # for token in tokens[0]:
     #     print(token)
-    print(tokens[0].tokens)
+    # print(tokens[0].tokens)
     token = tokens[0]
     i = 1
     stage = 1
@@ -114,7 +114,7 @@ def parseInsertStatement(sqlStatement):
                 tableNameIdx = newIndex
                 if(getTokenAtIndex(token, tableNameIdx, skip_ws=True).ttype == None): # identifier found
                     break
-            print(getTokenAtIndex(token, tableNameIdx, skip_ws=True).tokens)
+            # print(getTokenAtIndex(token, tableNameIdx, skip_ws=True).tokens)
             tableName = str(getTokenAtIndex(token, tableNameIdx, skip_ws=True).tokens[0])
             i = tableNameIdx + 1
             stage = 2
@@ -125,28 +125,28 @@ def parseInsertStatement(sqlStatement):
                 continue
             # print(str(curToken), curToken.tokens, i)
             attributeList = getNonWhitespaceTokens(curToken.tokens)
-            print(attributeList)
-            onlyValues = attributeList[2:-1]
-            print(onlyValues)
+            # print(attributeList)
+            onlyValues = attributeList[2:-1] # remove VALUES ( ) from the array
+            # print(onlyValues)
             for tok in onlyValues:
                 if(tok.ttype != sqlparse.tokens.Punctuation):
-                    print(dir(tok))
+                    # print(dir(tok))
                     tableAttributes.append(tok.value)
             stage = 3
 
         # print(curToken, curToken.ttype)
     print("table:",tableName)
-    print("attributes:",tableAttributes)
+    print("values:",tableAttributes)
 
 if __name__ == "__main__":
-    # parseCreateStatement("""CREATE TABLE IF NOT EXISTS Molecules 
-    #                     (   NAME            TEXT            NOT NULL,
-    #                         ATOM_NO         INTEGER         NOT NULL,
-    #                         BOND_NO         INTEGER         NOT NULL);""")
-    # parseCreateStatement("""CREATE TABLE   Molecules 
-    #                     (   NAME            TEXT            NOT NULL,
-    #                         ATOM_NO         INTEGER         NOT NULL,
-    #                         BOND_NO         INTEGER         NOT NULL);""")
+    parseCreateStatement("""CREATE TABLE IF NOT EXISTS Molecules 
+                        (   NAME            TEXT            NOT NULL,
+                            ATOM_NO         INTEGER         NOT NULL,
+                            BOND_NO         INTEGER         NOT NULL);""")
+    parseCreateStatement("""CREATE TABLE   Molecules 
+                        (   NAME            TEXT            NOT NULL,
+                            ATOM_NO         INTEGER         NOT NULL,
+                            BOND_NO         INTEGER         NOT NULL);""")
     parseInsertStatement("""INSERT OR IGNORE
                             INTO Molecules (NAME, ATOM_NO, BOND_NO)
                             VALUES ('Fire', 1, 2)""")                     
