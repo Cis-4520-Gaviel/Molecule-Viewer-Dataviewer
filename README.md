@@ -12,6 +12,32 @@ The front end was built using
 - `ReactJS`
 - `node`
 
+## Cryptosystem
+
+Built on Ubuntu 22.04.3 LTS
+
+- [cryptography](https://pypi.org/project/cryptography/)
+- [pymcl](https://github.com/Jemtaly/pymcl)
+- [otc](https://pypi.org/project/otc/)
+
+### Installing pymcl
+
+Configure
+
+```bash
+cd /usr/lib/wsl/lib
+sudo rm libcuda.so
+sudo rm libcuda.so.1
+sudo ln -s libcuda.so.1.1 libcuda.so
+sudo ln -s libcuda.so.1.1 libcuda.so.1
+```
+
+Then navigate to pypbc and run
+
+```
+sudo pip3 install .
+```
+
 ## Running
 
 There are two sections of code that will be needed to execute to run the full stack.

@@ -4,7 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
-
+/molecule-env
 # testing
 /coverage
 
@@ -27,3 +27,4 @@ molecule.py
 molecule_wrap.c
 molecules.db
 /__pycache__/
+*.pyc
