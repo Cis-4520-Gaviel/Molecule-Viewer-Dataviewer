@@ -1,4 +1,4 @@
-from pymcl import pairings
+from pymcl import pairing
 class QueryMutliplexer():
 
     def _auth(self, readerId):
@@ -34,7 +34,7 @@ class QueryMutliplexer():
         authR = self._auth(readerId=readerId)
         tPrime = []
         for w in authR:
-            cRSW = pairings(trapdoor, self._readers[readerId] * w)
+            cRSW = pairing(trapdoor, self._readers[readerId] * w)
             #create zsgbf
             #oblivious transfer
             tPrime.append((cRSW, 1))

@@ -2,8 +2,8 @@ import os
 from pymcl import Fr, g1, g2, pairing
 from abc import ABC, abstractmethod
 from Trapdoor import generateTrapdoor, generateTrapdoorBLS12381
-from ..database.QueryMultiplexer import QueryMutliplexer
-from ..database.DataHost import DataHost
+from database.QueryMultiplexer import QueryMutliplexer
+from database.DataHost import DataHost
 
 class User(ABC):
     @abstractmethod

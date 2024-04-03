@@ -2,8 +2,8 @@ from Users import Writer, Reader
 from pymcl import pairing, g1,g2
 
 def testUserNoDatabase():
-    writer = Writer(None, None)
-    reader = Reader(None, None)
+    writer = Writer(None, None, "Alice")
+    reader = Reader(None, None, "Bob")
     indexHashed = writer.encryptKeyword("Name='Gaviel'")
 
     auth = writer.delegate(reader.getPublicKey())

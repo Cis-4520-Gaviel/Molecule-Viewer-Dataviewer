@@ -1,8 +1,8 @@
 import sqlparse
-from CryptoUtils import AESSIVEncryptNonce, phiFunction, get_xor
+from utils.CryptoUtils import AESSIVEncryptNonce, phiFunction, get_xor
 from pymcl import g1, pairing
 import os
-from Parser import getSelectKeywords
+from sql.Parser import getSelectKeywords
 
 def generateTrapdoor(sql, K):
     """
