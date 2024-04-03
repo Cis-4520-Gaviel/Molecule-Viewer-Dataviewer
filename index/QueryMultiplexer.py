@@ -16,6 +16,9 @@ class QueryMutliplexer():
         self._authorizations = {}
 
     def addWriter(self, id, symmetricKey):
+        """
+        Add a given writer from their id and symmetric key
+        """
         self._writers.append((id, symmetricKey))
         self._authorizations[id] = []
 
