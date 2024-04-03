@@ -27,13 +27,14 @@ class Writer(User):
     def __init__(self, queryMultiplexer, dataHost, id):
         self._secretKey = self._setup()
         super().__init__(queryMultiplexer, dataHost, id)
+        self.QM.addWriter(self._secretKey, self.id)
 
-    def delegate(self, readerPublicKey: Fr):
+    def delegate(self, readerPublicKey: Fr, readerId: str):
         """
         Authorize a reader via their public key
         """
         auth = readerPublicKey * self._secretKey
-        #send to QM
+        self.QM.delegate(auth, self.id, readerId)
         return auth
 
     def encrypt(self, index):
@@ -60,6 +61,7 @@ class Reader(User):
         self._privateKey = privateKey
         self._kR = kR
         super().__init__(queryMultiplexer, dataHost, id)
+        self.QM.addReader(self._publicKey, self.id)
 
     def getPublicKey(self) -> Fr:
         return self._publicKey
