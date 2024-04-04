@@ -2,15 +2,11 @@ import os
 from utils.Node import Node
 from utils.AESCTR import AESCTR
 from cuckoopy import CuckooFilter
-from utils.CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction, get_xor
+from utils.CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
 from users.CreateDictionary import GetKeyAtValue
 from itertools import cycle
 from pymcl import pairing, g1, g2
-
-mockVal = bytes('aa', 'utf-8')
-
-GCMIV = os.urandom(12)
 
 # Generate a search index I
 def BuildIndex(W,n,K,Klen):
@@ -130,7 +126,7 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
     """
     ctr = 1 # Set global counter
 
-    m = 100
+    m = 101 * n
     A = [None] * m # Array A creation
 
     (Kpsi, Kpi, Kphi) = K # retrieve keys
@@ -140,28 +136,24 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
 
     # Traverse each keyword
     for keyword, ids in W.items():
-
-        # keyword = GetKeyAtValue(W, i) # get keyword
-        print('at keyword:', keyword)
-
         kHead = os.urandom(Klen // 8) # generate random key ki,0 for first node
 
         # generate address in A for first node using key Kpsi
         psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
         psiCtr = psuedoRandomPerm.encrypt(ctr.to_bytes(16, "big"))
         addrHead = int.from_bytes(psiCtr, 'big') % m
+        print("W_I:", keyword)
 
         # Traverse ids (vals) of keywords
         j=0
-        nodes.append((addrHead.to_bytes(1, 'big'), kHead))
+        nodes.append((addrHead.to_bytes(10, 'big'), kHead))
         for id in ids:
-            
             # print('encrypt id:',id)
             kNext = os.urandom(Klen // 8) # generate key ki,j to encrypt/decrypt next node
 
             # if not last node in list, generate address of next node using key Kpsi
             if(j != len(W[keyword]) - 1):
-                print('gen address for next node')
+                # print('gen address for next node')
                 psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
                 psiCtr = psuedoRandomPerm.encrypt((ctr + 1).to_bytes(16, "big"))
                 addrNext = int.from_bytes(psiCtr, 'big') % m
@@ -172,25 +164,23 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
             node = Node(id, kNext, addrNext)
 
             # Encrypt current node (N'ij) using prev key
-            print('encrypt node:',node)
+            print('N(recID, kNext, addrNext):',node, " addr:", addrHead)
             ct = AESSIVEncryptNonce(kHead, str(node)) #use AESSIV for undeterministic symmetric encryption
 
-            # if(A[nodeIndex] is not None): # debugging, print if we have a collision
-            #     print('Debug: Collision found')
+            if(A[addrHead] is not None): # debugging, print if we have a collision
+                print('Debug: Collision found')
+                raise Exception("hi")
 
             # Store node in A (pseudorandom order)
             A[addrHead] = ct
-            print('store encrypted node at address', addrHead)
-            # print('A:', A)
 
             # store current node info (address in A, key) for lookuptable
-
             kHead = kNext # next node key
             addrHead = addrNext # next node address in A
 
             ctr = ctr+1 # increment counter
             j=j+1
-            print()
+        print()
 
     # TODO: Fill in remaining entries of A with rando values
 

@@ -33,12 +33,15 @@ class QueryMutliplexer():
     def transform(self, trapdoor, readerId):
         authR = self._auth(readerId=readerId)
         tPrime = []
-        (pos, kW) = trapdoor[0]
-        for w in authR:
-            cRSW = pairing(pos, self._authorizations[w][readerId])
-            #create zsgbf
-            #oblivious transfer
-            tPrime.append((cRSW, kW))
+
+        for t in trapdoor:
+            (pos, kW) = t
+            for w in authR:
+                cRSW = pairing(pos, self._authorizations[w][readerId])
+                #create zsgbf
+                #oblivious transfer
+                tPrime.append((cRSW, kW))
+
         return tPrime
     
     def filter(self, results):
@@ -46,7 +49,7 @@ class QueryMutliplexer():
 
     def printData(self):
         """Omega debug function"""
-        print("writers: ", self._writers)
+        print("\nwriters: ", self._writers)
         print("readers: ", self._readers)
         print("Authorizations:")
         for writer in self._authorizations:

@@ -8,8 +8,8 @@ from utils.Node import Node
 def Search(I, minecraftdoor):
 
     (A, T) = I # parse index
-    (pos,Kw) = minecraftdoor[0] # parse trapdoor
-    print('Searching:', pos)
+    (pos,Kw) = minecraftdoor # parse trapdoor
+    # print('Searching:', pos)
 
     # for k,v in T.items():
     #     print(k,v)

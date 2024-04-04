@@ -9,9 +9,6 @@ class DataHost:
         self._encryptedIndexes = {}
         pass
 
-    def process(self, trapdoors):
-        pass
-
     def readerKeygen(self, readerId, readerKey):
         self._readerKeys[readerId] = readerKey
     
@@ -24,6 +21,9 @@ class DataHost:
         self._encryptedIndexes[tableName] = I
 
     def search(self, t, tableName='Molecules'):
-        R = Search(self._encryptedIndexes[tableName], t[0])
-        return R
+        results = set(())
+        
+        for trapdoor in t:
+            results.update(Search(self._encryptedIndexes[tableName], trapdoor))
+        return results
     
