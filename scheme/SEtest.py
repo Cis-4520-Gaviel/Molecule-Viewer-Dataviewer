@@ -1,9 +1,9 @@
-from Database import *
+from database.Database import *
 from KeyGen import *
-from CreateDictionary import *
-from BuildIndex import *
-from Trapdoor import *
-from Search import *
+from users.CreateDictionary import *
+from users.BuildIndex import *
+from users.Trapdoor import *
+from database.Search import *
 
 # Create test database
 D = Database(reset=True)

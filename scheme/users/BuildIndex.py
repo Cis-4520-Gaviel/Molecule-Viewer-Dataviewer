@@ -1,10 +1,10 @@
 import os
-from Node import Node
-from AESCTR import AESCTR
+from utils.Node import Node
+from utils.AESCTR import AESCTR
 from cuckoopy import CuckooFilter
-from CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction, get_xor
+from utils.CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction, get_xor
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
-from CreateDictionary import GetKeyAtValue
+from users.CreateDictionary import GetKeyAtValue
 from itertools import cycle
 
 mockVal = bytes('aa', 'utf-8')
@@ -26,41 +26,27 @@ def BuildIndex(W,n,K,Klen):
 
     (Kpsi, Kpi, Kphi) = K # retrieve keys
     nodes = [] # keeping track of each node (address in A and key)
-    ids = [] # keeping track of traversed ids
     
     PsiCipher = AESCTR(Kpsi) # cipher for the PRP we use for ordering the array elements
 
     # Traverse each keyword
-    for i in range(1, n+1):
+    for keyword, ids in W.items():
 
-        keyword = GetKeyAtValue(W, i) # get keyword
+        # keyword = GetKeyAtValue(W, i) # get keyword
         print('at keyword:', keyword)
-
-        #create linked list and the address of n1,j
-        # addressGenerator = PsiCipher.encryptor((1).to_bytes(16, "big"))
-        # head = addressGenerator.encrypt(ctr.to_bytes(16, "big"))
-        # print('head:',head)
 
         kHead = os.urandom(Klen // 8) # generate random key ki,0 for first node
 
         # generate address in A for first node using key Kpsi
         psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
         psiCtr = psuedoRandomPerm.encrypt(ctr.to_bytes(16, "big"))
-        # print(int.from_bytes(curAddr, 'big') % 1000)
         addrHead = int.from_bytes(psiCtr, 'big') % m
 
         # Traverse ids (vals) of keywords
-        for j in range(len(W[keyword])):
-
-            id = W[keyword][j] # retrieve record id
-
-            if id in ids: # check if id already traversed
-                print('id', W[keyword][j], 'already exists!\n')
-                continue
-            else:
-                ids.append(id)
+        j=0
+        for id in ids:
             
-            # print('encrypt id:', W[keyword][j], 'from j index', j)
+            # print('encrypt id:',id)
             kNext = os.urandom(Klen // 8) # generate key ki,j to encrypt/decrypt next node
 
             # if not last node in list, generate address of next node using key Kpsi
@@ -69,7 +55,6 @@ def BuildIndex(W,n,K,Klen):
                 psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
                 psiCtr = psuedoRandomPerm.encrypt((ctr + 1).to_bytes(16, "big"))
                 addrNext = int.from_bytes(psiCtr, 'big') % m
-                # node.setNextAddress(psiCtr)
             else:
                 addrNext = None # last node
 
@@ -78,7 +63,6 @@ def BuildIndex(W,n,K,Klen):
 
             # Encrypt current node (N'ij) using prev key
             aessiv = AESSIV(kHead) #encrypting each node with non deterministic encryptor
-            # nonce = os.urandom(16)      #generating a 128-bit nonce
             print('encrypt node:',node)
             ct = aessiv.encrypt(bytes(str(node),'utf-8'), None) #use AESSIV for undeterministic symmetric encryption
 
@@ -97,29 +81,22 @@ def BuildIndex(W,n,K,Klen):
             addrHead = addrNext # next node address in A
 
             ctr = ctr+1 # increment counter
+            j=j+1
             print()
 
     # TODO: Fill in remaining entries of A with rando values
 
     # Look up table T creation
     T = {} # unsecure lookup table ! should use a secure table like cuckoo table
-    ids = [] # reset traversed ids
     nodeIndex = 0
     # TODO: store info in T in pseudorandom order using key Kpi
-    for i in range(1, n+1):
-        keyword = GetKeyAtValue(W, i) #retrieve keyword
+    for keyword, ids in W.items():
         # print('encrypt keyword:', keyword)
 
         # Traverse ids (vals) of keywords
-        for j in range(len(W[keyword])):
-            id = W[keyword][j] # retrieve record id
-
-            if id in ids: # check if id already traversed
-                # print('id', W[keyword][j], 'already exists!\n')
-                continue
-            else:
-                ids.append(id)
-
+        j=0
+        for id in ids:
+            # print('encrypt id2:',id)
             Ki = phiFunction(Kphi, keyword) #get key Ki
 
             (addr, k) = nodes[nodeIndex] #retrieve addr in A and k of node

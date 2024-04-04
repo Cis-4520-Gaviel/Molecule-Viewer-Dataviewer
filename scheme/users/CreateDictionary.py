@@ -21,10 +21,10 @@ def CreateDictionary(D):
             else:
                 W[keyword]=[id] # create new id list for keyword
             # Use .append
-            id=id+1
             i=i+1
             # print(W)
         # print()
+        id=id+1
     # print('W')
     # print(W)
     return W, id-1
