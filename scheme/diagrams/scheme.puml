@@ -1,13 +1,45 @@
 @startuml scheme
+class User
+User : id: str
 class Reader
 class Writer
 class Database
 class QueryMultiplexer
 class DataHost
-class Trapdoor
 class EncryptedIndex 
-Reader : secretKey
-QueryMultiplexer o-- Reader
-QueryMultiplexer o-- Writer
+class UntrustedDatabase
 
+Reader : secretKey
+Reader : PublicKey : G2
+Reader : PrivateKey : Fr
+
+Writer : secretKey
+DataHost o-- Reader
+DataHost : readerKeys : dict
+DataHost : encryptedIndecies : dict
+DataHost : Search (trapdoor)
+DataHost : UploadIndex (index)
+
+QueryMultiplexer : writers : list
+QueryMultiplexer : readers : list
+QueryMultiplexer : authorizations : dict<list>
+QueryMultiplexer : addWriter (id, key)
+QueryMultiplexer : addReader (id, key)
+QueryMultiplexer : delegate (auth, writerId, readerId)
+QueryMultiplexer : transform (trapdoor, readerId)
+
+Writer : delegate (readerPublicKey, readerId)
+Writer : encrypt (tableName)
+Writer : updateDatabase (values)
+
+Reader : trapdoor (sqlStatement)
+
+QueryMultiplexer o-- Reader
+DataHost o-- Writer
+User <-- Reader
+User <-- Writer
+Writer o-- Database
+DataHost o-- EncryptedIndex
+QueryMultiplexer *--* DataHost
+DataHost *-- UntrustedDatabase
 @enduml
