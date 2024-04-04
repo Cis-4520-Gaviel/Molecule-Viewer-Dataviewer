@@ -10,7 +10,7 @@ def generateTrapdoor(sql, K):
     """
     (Kpsi, Kpi, Kphi) = K # retrieve keys
     print('input SQL:', sql)
-    keywords = ExtractKeywords(sql)
+    keywords = getSelectKeywords(sql)
     # print('extract keywords:', keywords)
     # AESSIVEncryptNonce(K, keywords[0])
     trapdoors = []
@@ -22,6 +22,24 @@ def generateTrapdoor(sql, K):
         trapdoors.append((pos, Kw))
     return trapdoors
     
+def generateTrapdoor(sql, K, privKey): #using new hash
+    """
+    generates an array of trapdoors from a select sql statement containing one or more queries
+    """
+    (Kpsi, Kpi, Kphi) = K # retrieve keys
+    print('input SQL:', sql)
+    keywords = getSelectKeywords(sql)
+    # print('extract keywords:', keywords)
+    # AESSIVEncryptNonce(K, keywords[0])
+    trapdoors = []
+    for keyword in keywords:
+        print('extract keyword:', keyword)
+        posHash = g1.hash(bytes(keyword, 'utf-8'))
+        pos = posHash * privKey
+        Kw = phiFunction(Kphi, keyword) #get key Kw (same as Ki from lookuptable creation)
+        # print('get Kw', Kw, 'of type', type(Kw))
+        trapdoors.append((pos, Kw))
+    return trapdoors
 def generateTrapdoorBLS12381(sql, privKey):
     """
     generates an array of trapdoors from a select sql statement containing one or more queries

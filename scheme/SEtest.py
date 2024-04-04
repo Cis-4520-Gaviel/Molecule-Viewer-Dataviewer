@@ -25,7 +25,7 @@ K = KeyGen(Klen) # K = (Kpsi, Kpi, Kphi)
 
 # Test CreateDictionary
 print('Testing CreateDictionary...')
-W, n = CreateDictionary(D)
+W, n = CreateDictionary(D, 'Molecules')
 print(W)
 # print('Indexing...')
 # for i in range(1, n+1):

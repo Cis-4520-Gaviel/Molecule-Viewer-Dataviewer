@@ -14,7 +14,7 @@ def Search(I, minecraftdoor):
     #     print(k,v)
 
     # Locate entry T[pos]
-    theta = T[pos]
+    theta = T[str(pos)]
     # print('value:',theta)
 
     R = [] # keeping track of record ids

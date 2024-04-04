@@ -33,13 +33,13 @@ class QueryMutliplexer():
     def transform(self, trapdoor, readerId):
         authR = self._auth(readerId=readerId)
         tPrime = []
+        (pos, kW) = trapdoor[0]
         for w in authR:
-            cRSW = pairing(trapdoor, self._readers[readerId] * w)
+            cRSW = pairing(pos, self._authorizations[w][readerId])
             #create zsgbf
             #oblivious transfer
-            tPrime.append((cRSW, 1))
-        yield Exception("not finished yet")
-        return True
+            tPrime.append((cRSW, kW))
+        return tPrime
     
     def filter(self, results):
         yield Exception("not implemented yet")

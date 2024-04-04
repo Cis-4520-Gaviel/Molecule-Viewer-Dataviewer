@@ -1,10 +1,11 @@
 import os
 from pymcl import Fr, g1, g2, pairing
 from abc import ABC, abstractmethod
-from Trapdoor import generateTrapdoor, generateTrapdoorBLS12381
+from users.Trapdoor import generateTrapdoor, generateTrapdoorBLS12381
 from database.QueryMultiplexer import QueryMutliplexer
 from database.DataHost import DataHost
-
+from KeyGen import KeyGen
+from database.Database import Database
 class User(ABC):
     @abstractmethod
     def _setup(self):
@@ -22,12 +23,19 @@ class Writer(User):
     """
     def _setup(self):
         secretKey = Fr.random()
+        self._keySet = KeyGen(256)
         return secretKey
 
     def __init__(self, queryMultiplexer, dataHost, id):
         self._secretKey = self._setup()
+        self._database = Database(True)
+        self._database.create_tables()
         super().__init__(queryMultiplexer, dataHost, id)
         self.QM.addWriter(self._secretKey, self.id)
+        
+
+    def updateDatabase(self, values):
+        self._database.add_molecule(*values)
 
     def delegate(self, readerPublicKey: Fr, readerId: str):
         """
@@ -37,8 +45,8 @@ class Writer(User):
         self.QM.delegate(auth, self.id, readerId)
         return auth
 
-    def encrypt(self, index):
-        yield Exception("not implemented yet")
+    def encrypt(self, tableName = 'Molecules'):
+        self.DH.encryptTable(self._database, tableName, self._keySet, secretKey=self._secretKey)
 
     def encryptKeyword(self, keyword):
         return pairing(g1.hash(bytes(keyword, 'utf-8')), g2 * self._secretKey)
@@ -70,3 +78,6 @@ class Reader(User):
         test = generateTrapdoorBLS12381(sqlStatement, self._privateKey) # nuh uh
         return test
         # yield Exception("need to implement this")
+    def trapdoor(self, sqlStatement, DEBUGKEYSET):
+        test = generateTrapdoor(sqlStatement, DEBUGKEYSET, self._privateKey) # nuh uh
+        return test

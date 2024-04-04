@@ -1,0 +1,13 @@
+@startuml scheme
+class Reader
+class Writer
+class Database
+class QueryMultiplexer
+class DataHost
+class Trapdoor
+class EncryptedIndex 
+Reader : secretKey
+QueryMultiplexer o-- Reader
+QueryMultiplexer o-- Writer
+
+@enduml

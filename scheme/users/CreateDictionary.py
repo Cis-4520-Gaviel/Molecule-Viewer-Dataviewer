@@ -1,8 +1,8 @@
 
 
 # Constructs a dictionary W from database D
-def CreateDictionary(D):
-    table = D.retrieve_all('Molecules')
+def CreateDictionary(D, tableName: str):
+    table = D.retrieve_all(tableName)
     allAttributes = D.getAttributes()
     W = {}
     # print('Total Attr:', allAttributes)
