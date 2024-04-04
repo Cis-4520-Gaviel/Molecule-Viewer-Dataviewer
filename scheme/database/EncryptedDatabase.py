@@ -14,12 +14,15 @@ class EncryptedDatabase:
         """
         use this for creating stuff
         """
+        print("I saw that you ran this command!!!! >:))))", sql)
         self.conn.execute(sql)
         # Commit transaction
         self.conn.commit()
 
     # This method retrieves all entries from a table
     def retrieveRecords(self, sql):
+        print("I saw that you ran this command!!!! >:))))", sql)
+
         entries = self.conn.execute(sql).fetchall()
         return entries
     
