@@ -128,7 +128,6 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
     Kpi is used for address of lookup table, key for PRP
     Kphi is used to encrypt values, key for PRF
     """
-
     ctr = 1 # Set global counter
 
     m = 100
@@ -173,9 +172,8 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
             node = Node(id, kNext, addrNext)
 
             # Encrypt current node (N'ij) using prev key
-            aessiv = AESSIV(kHead) #encrypting each node with non deterministic encryptor
             print('encrypt node:',node)
-            ct = aessiv.encrypt(bytes(str(node),'utf-8'), None) #use AESSIV for undeterministic symmetric encryption
+            ct = AESSIVEncryptNonce(kHead, str(node)) #use AESSIV for undeterministic symmetric encryption
 
             # if(A[nodeIndex] is not None): # debugging, print if we have a collision
             #     print('Debug: Collision found')
@@ -186,7 +184,6 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
             # print('A:', A)
 
             # store current node info (address in A, key) for lookuptable
-
 
             kHead = kNext # next node key
             addrHead = addrNext # next node address in A
@@ -220,16 +217,11 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
         addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
         k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
 
-
-
         T[str(pos)] = [(addr, k)] # create new value list for keyword
         nodeIndex = nodeIndex + 1
 
-
     I = (A, T)
-
     return I
-
 
 def EncryptTable(T, K):
     attributes = ['stuff', 'stuff2'] # mock data

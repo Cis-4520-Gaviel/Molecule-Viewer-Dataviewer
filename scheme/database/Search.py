@@ -1,6 +1,6 @@
 from itertools import cycle
-from cryptography.hazmat.primitives.ciphers.aead import AESSIV
 import os
+from utils.CryptoUtils import AESSIVDecryptNonce
 from utils.CryptoUtils import xor
 from utils.Node import Node
 # Search over the search index I using the search token generated with
@@ -29,14 +29,13 @@ def Search(I, minecraftdoor):
     results = []
 
     while(nextAddr is not None):
-        aessiv = AESSIV(nextKey) #decrypting each node with non deterministic encryptor
         try:
             N = A[nextAddr]
         except:
             print("Address not found!!!!")
             return results
         
-        node = aessiv.decrypt(N, None)
+        node = AESSIVDecryptNonce(nextKey, N)
         curNode = Node.parseString(str(node.decode()))
         results.append(curNode.recordID)
         nextAddr = curNode.addressNext
