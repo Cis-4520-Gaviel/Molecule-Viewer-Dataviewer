@@ -1,6 +1,8 @@
 import os
 from cryptography.hazmat.primitives.ciphers import aead;
 from cryptography.hazmat.primitives import hashes;
+from itertools import cycle
+
 
 def AESSIVEncryptNonce(k : bytes, data : str, nonceLength = 12) -> bytes:
     """
@@ -49,4 +51,8 @@ def get_xor(a, b):
         z = x ^ y               # Calculate XOR of x and y
         result = str(z) + result               # Prepend the XOR result to the 'result' string
      
+    return result
+
+def xor(a, b) -> bytes:
+    result = bytes(a ^ b for a, b in zip(a, cycle(b)))
     return result

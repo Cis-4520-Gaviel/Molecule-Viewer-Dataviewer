@@ -154,6 +154,7 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
 
         # Traverse ids (vals) of keywords
         j=0
+        nodes.append((addrHead.to_bytes(1, 'big'), kHead))
         for id in ids:
             
             # print('encrypt id:',id)
@@ -185,7 +186,7 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
             # print('A:', A)
 
             # store current node info (address in A, key) for lookuptable
-            nodes.append((addrHead.to_bytes(1, 'big'), kHead))
+
 
             kHead = kNext # next node key
             addrHead = addrNext # next node address in A
@@ -199,35 +200,31 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
     # Look up table T creation
     T = {} # unsecure lookup table ! should use a secure table like cuckoo table
     nodeIndex = 0
+
     # TODO: store info in T in pseudorandom order using key Kpi
     for keyword, ids in W.items():
         # print('encrypt keyword:', keyword)
 
-        # Traverse ids (vals) of keywords
-        j=0
-        for id in ids:
-            # print('encrypt id2:',id)
-            Ki = phiFunction(Kphi, keyword) #get key Ki
+        # print('encrypt id2:',id)
+        Ki = phiFunction(Kphi, keyword) #get key Ki
 
-            pos = pairing(g1.hash(bytes(keyword, 'utf-8')), g2 * secretKey)
+        pos = pairing(g1.hash(bytes(keyword, 'utf-8')), g2 * secretKey)
 
-            (addr, k) = nodes[nodeIndex] #retrieve addr in A and k of node
-            # print('get addr:', addr, 'of type', type(addr))
-            # print('real address:', int.from_bytes(addr,'big'))
-            # print('get k:', k, 'of type', type(k))
-            # print('get Ki', Ki, 'of type', type(Ki))
+        (addr, k) = nodes[nodeIndex] #retrieve addr in A and k of node
+        # print('get addr:', addr, 'of type', type(addr))
+        # print('real address:', int.from_bytes(addr,'big'))
+        # print('get k:', k, 'of type', type(k))
+        # print('get Ki', Ki, 'of type', type(Ki))
 
-            # value = get_xor(addr + k, Ki) # combine addr+k, xor with val
-            addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
-            k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
+        # value = get_xor(addr + k, Ki) # combine addr+k, xor with val
+        addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
+        k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
 
-            if keyword in T:
-                T[str(pos)].append((addr, k)) # add to value list of keyword
-            else:
-                T[str(pos)] = [(addr, k)] # create new value list for keyword
-            
-            nodeIndex = nodeIndex+1
-    
+
+
+        T[str(pos)] = [(addr, k)] # create new value list for keyword
+        nodeIndex = nodeIndex + 1
+
 
     I = (A, T)
 
