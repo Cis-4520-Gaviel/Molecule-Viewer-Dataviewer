@@ -126,7 +126,7 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
     """
     ctr = 1 # Set global counter
 
-    m = 101 * n
+    m = 1010 * n
     A = [None] * m # Array A creation
 
     (Kpsi, Kpi, Kphi) = K # retrieve keys
