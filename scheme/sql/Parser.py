@@ -66,7 +66,7 @@ def getSelectKeywords(sql):
             # print(token.token_next(1)[1])
             # print("output: ",temp)
             # print("comparisons:", temp.split("AND"))
-            return temp.split("AND")
+            return temp.split("OR")
             # nextToken = token.token_next(1)
             # print('Occurrances',nextToken)
             # print(nextToken[1])

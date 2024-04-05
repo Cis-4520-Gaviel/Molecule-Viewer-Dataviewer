@@ -27,26 +27,24 @@ def testScheme():
     writer.updateDatabase(['Earth', 1, 3])
     for i in range(100):
         writer.updateDatabase([''.join(random.choices(string.ascii_uppercase + string.digits, k=5)), random.randint(0,1000), random.randint(0,30)])
-    # writer.updateDatabase(['Joel', 69, 12], True)
-    # writer.updateDatabase(['Myron', 100, 11], True)
-    # writer.updateDatabase(['Me', 12, 33], True)
+    writer.updateDatabase(['Joel', 69, 12], True)
+    writer.updateDatabase(['Myron', 100, 11], True)
+    writer.updateDatabase(['Me', 12, 33], True)
     writer.encrypt()
     # auth delegation
 
-    dh.readerKeygen(reader.id, reader.getPublicKey())
-
     writer.delegate(reader.getPublicKey(), reader.id)
     #search query
-    trapdoors = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';", writer._keySet)
+    trapdoors = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
     tPrime = qm.transform(trapdoors, reader.id)
     # print(tPrime)
     printResults(dh.search(tPrime), "SELECT * FROM Molecules WHERE BOND_NO='1';", reader.id)
 
-    t2 = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' AND NAME='Earth';", writer._keySet)
+    t2 = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")
     tp2 = qm.transform(t2, reader.id)
-    printResults(dh.search(tp2), "SELECT * FROM Molecules WHERE BOND_NO='1' AND NAME='Earth';", reader.id)
+    printResults(dh.search(tp2), "SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';", reader.id)
 
-    badTrapdoor = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';", writer._keySet)
+    badTrapdoor = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
     badTrapdoors = qm.transform(badTrapdoor, reader2.id)
 
     printResults(dh.search(badTrapdoors), "SELECT * FROM Molecules WHERE BOND_NO='1';", reader2.id)

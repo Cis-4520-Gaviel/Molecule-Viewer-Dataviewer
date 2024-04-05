@@ -35,12 +35,14 @@ class QueryMutliplexer():
         tPrime = []
 
         for t in trapdoor:
-            (pos, kW) = t
+            (pos, kW, tableName) = t
             for w in authR:
+                print(pos.__class__)
                 cRSW = pairing(pos, self._authorizations[w][readerId])
+                tableName = pairing(tableName, self._authorizations[w][readerId])
                 #create zsgbf
                 #oblivious transfer
-                tPrime.append((cRSW, kW))
+                tPrime.append((cRSW, kW, tableName))
 
         return tPrime
     

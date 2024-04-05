@@ -7,6 +7,8 @@ from database.DataHost import DataHost
 from KeyGen import KeyGen
 from database.Database import Database
 from sql.Parser import parseInsertStatement
+from cryptography.hazmat.primitives.ciphers.aead import AESSIV
+
 class User(ABC):
     @abstractmethod
     def _setup(self):
@@ -33,12 +35,16 @@ class Writer(User):
         self._database.create_tables()
         super().__init__(queryMultiplexer, dataHost, id)
         self.QM.addWriter(self._secretKey, self.id)
-        self.DH.registerNewTable('Molecules', ['NAME', 'ATOM_NO', 'BOND_NO'])
+        self.createNewTable('Molecules', ['NAME', 'ATOM_NO', 'BOND_NO'])
         
+    def createNewTable(self, tableName, attributes):
+        encTableName = pairing(g1.hash(bytes(tableName, 'utf-8')), g2 * self._secretKey)
+        self.DH.registerNewTable(encTableName.serialize().hex(), attributes)
 
-    def updateDatabase(self, values, rebuildIndex = False):
+    def updateDatabase(self, values, rebuildIndex = False, tableName = "Molecules"):
         self._database.add_molecule(*values)
-        self.DH.addNewValuesToTable('Molecules', values)
+        encTableName = pairing(g1.hash(bytes(tableName, 'utf-8')), g2 * self._secretKey)
+        self.DH.addNewValuesToTable(encTableName.serialize().hex(), values)
         if(rebuildIndex == True):
             self.encrypt('Molecules')
 
@@ -51,7 +57,8 @@ class Writer(User):
         return auth
 
     def encrypt(self, tableName = 'Molecules'):
-        self.DH.encryptTable(self._database, tableName, self._keySet, secretKey=self._secretKey)
+        encTableName = pairing(g1.hash(bytes(tableName, 'utf-8')), g2 * self._secretKey)
+        self.DH.encryptTable(self._database, encTableName.serialize().hex(), self._keySet, secretKey=self._secretKey, realTableName=tableName)
 
     def encryptKeyword(self, keyword):
         return pairing(g1.hash(bytes(keyword, 'utf-8')), g2 * self._secretKey)
@@ -65,7 +72,7 @@ class Reader(User):
     def _setup(self):
         privateKey = Fr.random()
         publicKey = g2 * ~privateKey
-        kR = os.urandom(8)
+        kR = AESSIV.generate_key(256)
         return publicKey, privateKey, kR
 
     def __init__(self, queryMultiplexer, dataHost, id):
@@ -75,6 +82,7 @@ class Reader(User):
         self._kR = kR
         super().__init__(queryMultiplexer, dataHost, id)
         self.QM.addReader(self._publicKey, self.id)
+        self.DH.addReader(self.id, self._kR)
 
     def getPublicKey(self) -> Fr:
         return self._publicKey
@@ -83,6 +91,6 @@ class Reader(User):
         test = generateTrapdoorBLS12381(sqlStatement, self._privateKey) # nuh uh
         return test
         # yield Exception("need to implement this")
-    def trapdoor(self, sqlStatement, DEBUGKEYSET):
-        test = generateTrapdoor(sqlStatement, DEBUGKEYSET, self._privateKey) # nuh uh
+    def trapdoor(self, sqlStatement):
+        test = generateTrapdoor(sqlStatement, self._privateKey) # nuh uh
         return test
