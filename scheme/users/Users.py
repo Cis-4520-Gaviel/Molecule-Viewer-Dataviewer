@@ -6,6 +6,7 @@ from database.QueryMultiplexer import QueryMutliplexer
 from database.DataHost import DataHost
 from KeyGen import KeyGen
 from database.Database import Database
+from sql.Parser import parseInsertStatement
 class User(ABC):
     @abstractmethod
     def _setup(self):
@@ -32,10 +33,14 @@ class Writer(User):
         self._database.create_tables()
         super().__init__(queryMultiplexer, dataHost, id)
         self.QM.addWriter(self._secretKey, self.id)
+        self.DH.registerNewTable('Molecules', ['NAME', 'ATOM_NO', 'BOND_NO'])
         
 
-    def updateDatabase(self, values):
+    def updateDatabase(self, values, rebuildIndex = False):
         self._database.add_molecule(*values)
+        self.DH.addNewValuesToTable('Molecules', values)
+        if(rebuildIndex == True):
+            self.encrypt('Molecules')
 
     def delegate(self, readerPublicKey: Fr, readerId: str):
         """
