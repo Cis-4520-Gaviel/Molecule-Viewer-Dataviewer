@@ -1,0 +1,87 @@
+@startuml Gaviel Scheme
+
+participant Reader
+participant Writer
+database WriterDatabase
+box "Semi-Honest Proxies"
+entity QM
+entity DH
+end box
+database SQLServer
+== Create ==
+
+Writer -> Writer : Keygen
+activate Writer
+Writer->QM: addWriter(secretKey, id)
+deactivate Writer
+
+Reader->Reader: keygen
+activate Reader
+Reader->QM: addReader(publicKey, id)
+deactivate Reader
+== Encrypt ==
+Writer->DH: Encrypt(Database, keys)
+activate Writer
+activate DH
+note right: Generating the an encrypted index\n of the database
+DH->DH: GenerateIndex
+deactivate Writer
+deactivate DH
+
+== Modifying Database ==
+Writer -> WriterDatabase : AddData(values)
+activate Writer
+Writer -> DH: updateDatabase(values)
+activate DH
+
+DH->SQLServer: getTableRecordLength (tableName)
+activate SQLServer
+SQLServer-->DH: number of records
+deactivate SQLServer
+
+DH->SQLServer: INSERT INTO\n {table} VALUES (*)
+deactivate DH
+
+
+alt RegenerateIndex=True
+Writer->DH: EncryptIndex (Database, Keys)
+activate DH
+DH->DH: BuildIndex(Database, Keys)
+deactivate Writer
+end
+deactivate DH
+
+
+== Delegate ==
+Reader-->Writer: Send public Key
+activate Writer
+Writer->Writer: Generate authorization(auth)
+Writer->QM: Delegate (auth, writerId, readerId)
+deactivate Writer
+
+== Search ==
+||10||
+
+Reader -> Reader: Generate Search Query \n(Trapdoor)
+activate Reader
+Reader->QM:Transform (trapdoor)
+
+activate QM
+QM->QM: transform queries
+activate QM #DarkGrey
+QM-->DH: Search(t'_{r,s})
+activate DH
+DH -> DH : Search (I, trapdoor)
+
+
+
+DH->SQLServer : retrieveRecords (tableName, recordIDs)
+activate SQLServer
+SQLServer-->DH:Encrypted results
+deactivate SQLServer
+DH-->QM:p'_{r,s}
+deactivate DH
+deactivate QM
+
+QM->Reader:p_{r_s}
+@enduml
