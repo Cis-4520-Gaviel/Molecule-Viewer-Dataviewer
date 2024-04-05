@@ -10,21 +10,52 @@ class EncryptedDatabase:
         self.conn = sqlite3.connect('eDatabase.db')
 
     # This method creates tables
-    def executeCreationCommand(self, sql):
+    def createTable(self, name, attributes):
         """
         use this for creating stuff
         """
-        print("I saw that you ran this command!!!! >:))))", sql)
-        self.conn.execute(sql)
+        sqlAttributes = "( recordID INT"
+        for attribute in attributes:
+            sqlAttributes = sqlAttributes + f", _{attribute} VARCHAR(120)"
+        sqlAttributes = sqlAttributes + ")"
+
+        sqlCommand = f"""CREATE TABLE IF NOT EXISTS _{name} {sqlAttributes};"""
+        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+        self.conn.execute(sqlCommand)
         # Commit transaction
         self.conn.commit()
 
-    # This method retrieves all entries from a table
-    def retrieveRecords(self, sql):
-        print("I saw that you ran this command!!!! >:))))", sql)
+    def insertIntoTable(self, name, attributes, values):
+        sqlAttributes = "( recordID"
+        for attribute in attributes:
+            sqlAttributes = sqlAttributes + f", _{attribute}"
+        sqlAttributes = sqlAttributes + ")"
 
-        entries = self.conn.execute(sql).fetchall()
+        sqlValues = f"{values[0]}"
+        for value in values[1:]:
+            sqlValues = sqlValues + f",'{value}'"
+        
+        
+        sqlCommand = f"""INSERT OR IGNORE
+                            INTO _{name} {sqlAttributes}
+                            VALUES ({sqlValues});"""
+        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+        self.conn.execute(sqlCommand)
+        self.conn.commit()
+
+    # This method retrieves all entries from a table
+    def retrieveRecords(self, name, records: list):
+        sqlRecords = str(records).strip('[]')
+        
+        sqlCommand = f"SELECT * FROM _{name} WHERE recordID IN ({sqlRecords});"
+        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+        entries = self.conn.execute(sqlCommand).fetchall()
         return entries
+    
+
+    def getTableRecordLength(self, tableName):
+        entries = self.conn.execute(f"SELECT * FROM _{tableName}").fetchall()
+        return len(entries)
     
     # This method checks if an entry already exists within a table
     def check_entry(self, table, attribute, entry):
