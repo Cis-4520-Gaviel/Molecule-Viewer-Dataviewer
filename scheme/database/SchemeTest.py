@@ -2,6 +2,7 @@ from users.Users import Writer, Reader
 from pymcl import pairing, g1,g2
 from database.QueryMultiplexer import QueryMutliplexer
 from database.DataHost import DataHost
+from EncryptedDatabase import EncryptedDatabase
 import random
 import string
 def printResults(results, query, readerId):
@@ -12,8 +13,10 @@ def testScheme():
     print(g1)
     print(g1)
 
+    
+
     qm = QueryMutliplexer(b'123')
-    dh = DataHost()
+    dh = DataHost(EncryptedDatabase(True))
     writer = Writer(qm, dh, "Alice")
     reader = Reader(qm, dh, "Bob")
     reader2 = Reader(qm, dh, "Cathy")
@@ -24,6 +27,9 @@ def testScheme():
     writer.updateDatabase(['Earth', 1, 3])
     for i in range(100):
         writer.updateDatabase([''.join(random.choices(string.ascii_uppercase + string.digits, k=5)), random.randint(0,1000), random.randint(0,30)])
+    # writer.updateDatabase(['Joel', 69, 12], True)
+    # writer.updateDatabase(['Myron', 100, 11], True)
+    # writer.updateDatabase(['Me', 12, 33], True)
     writer.encrypt()
     # auth delegation
 
