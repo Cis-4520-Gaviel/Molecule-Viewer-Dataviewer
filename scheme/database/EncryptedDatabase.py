@@ -20,7 +20,8 @@ class EncryptedDatabase:
         sqlAttributes = sqlAttributes + ")"
 
         sqlCommand = f"""CREATE TABLE IF NOT EXISTS _{name} {sqlAttributes};"""
-        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+        print('Run sql command for createtable')
+        # print("Run sql command:", sqlCommand)
         self.conn.execute(sqlCommand)
         # Commit transaction
         self.conn.commit()
@@ -39,7 +40,8 @@ class EncryptedDatabase:
         sqlCommand = f"""INSERT OR IGNORE
                             INTO _{name} {sqlAttributes}
                             VALUES ({sqlValues});"""
-        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+        print('Run sql command for insertintotable')
+        # print("Run sql command:", sqlCommand)
         self.conn.execute(sqlCommand)
         self.conn.commit()
 
@@ -48,7 +50,8 @@ class EncryptedDatabase:
         sqlRecords = str(records).strip('[]')
         
         sqlCommand = f"SELECT * FROM _{name} WHERE recordID IN ({sqlRecords});"
-        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+        print('Run sql command for retrieverecords')
+        # print("I saw that you ran this command!!!! >:))))", sqlCommand)
         entries = self.conn.execute(sqlCommand).fetchall()
         return entries
     

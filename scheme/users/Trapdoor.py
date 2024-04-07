@@ -43,6 +43,7 @@ def generateTrapdoor(sql, privKey): #using new hash
         Kw = phiFunction(Kphi, keyword) #get key Kw (same as Ki from lookuptable creation)
         # print('get Kw', Kw, 'of type', type(Kw))
         trapdoors.append((pos, Kw, encTableName))
+    print('generate trapdoors:',trapdoors)
     return trapdoors
 
 def generateTrapdoorBLS12381(sql, privKey):

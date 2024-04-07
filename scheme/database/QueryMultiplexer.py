@@ -19,31 +19,39 @@ class QueryMutliplexer():
         """
         Add a given writer from their id and symmetric key
         """
+        print('QM: add writer [',id,']')
         self._writers.append((id, symmetricKey))
         self._authorizations[id] = {}
+        print('QM: done add writer')
 
     def addReader(self, publicKey: Fr, id: str):
+        print('QM: add reader [',id,']')
         self._readers.append((id, publicKey)) #prob need to add more authentication still
+        print('QM: done add reader')
     
     def delegate(self, auth, writerId, readerId):
+        print('QM:',writerId,'authorizes',readerId)
         if writerId not in self._authorizations:
             return False
         self._authorizations[writerId][readerId] = auth # replace this with the actual value
+        print('QM: done delegate')
     
     def transform(self, trapdoor, readerId):
+        print('QM: transform trapdoor', trapdoor,'for',readerId)
         authR = self._auth(readerId=readerId)
         tPrime = []
 
         for t in trapdoor:
             (pos, kW, tableName) = t
             for w in authR:
-                print(pos.__class__)
+                # print(pos.__class__)
                 cRSW = pairing(pos, self._authorizations[w][readerId])
                 tableName = pairing(tableName, self._authorizations[w][readerId])
                 #create zsgbf
                 #oblivious transfer
                 tPrime.append((cRSW, kW, tableName))
 
+        print('QM: done transform [',tPrime,']')
         return tPrime
     
     def filter(self, results):
@@ -51,7 +59,8 @@ class QueryMutliplexer():
 
     def printData(self):
         """Omega debug function"""
-        print("\nwriters: ", self._writers)
+        print('QM: print data')
+        print("writers: ", self._writers)
         print("readers: ", self._readers)
         print("Authorizations:")
         for writer in self._authorizations:

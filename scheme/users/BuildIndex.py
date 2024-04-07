@@ -142,7 +142,7 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
         psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
         psiCtr = psuedoRandomPerm.encrypt(ctr.to_bytes(16, "big"))
         addrHead = int.from_bytes(psiCtr, 'big') % m
-        print("W_I:", keyword)
+        # print("W_I:", keyword)
 
         # Traverse ids (vals) of keywords
         j=0
@@ -164,7 +164,7 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
             node = Node(id, kNext, addrNext)
 
             # Encrypt current node (N'ij) using prev key
-            print('N(recID, kNext, addrNext):',node, " addr:", addrHead)
+            # print('N(recID, kNext, addrNext):',node, " addr:", addrHead)
             ct = AESSIVEncryptNonce(kHead, str(node)) #use AESSIV for undeterministic symmetric encryption
 
             if(A[addrHead] is not None): # debugging, print if we have a collision
@@ -180,7 +180,7 @@ def BuildIndexNewHash(W,n,K,Klen, secretKey):
 
             ctr = ctr+1 # increment counter
             j=j+1
-        print()
+        # print()
 
     # TODO: Fill in remaining entries of A with rando values
 
