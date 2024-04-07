@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import time
 
 # Class to support database operations
 class EncryptedDatabase:
@@ -8,6 +9,11 @@ class EncryptedDatabase:
         if reset == True and os.path.exists('eDatabase.db'):
             os.remove('eDatabase.db')
         self.conn = sqlite3.connect('eDatabase.db')
+    def _logAction(self, sqlAction, loggedTime):
+        f = open("logs.txt", "a")
+        f.write("[" + time.ctime(loggedTime) +"]: " + sqlCommand)
+        f.write("\n")
+        f.close()
 
     # This method creates tables
     def createTable(self, name, attributes):
@@ -20,10 +26,12 @@ class EncryptedDatabase:
         sqlAttributes = sqlAttributes + ")"
 
         sqlCommand = f"""CREATE TABLE IF NOT EXISTS _{name} {sqlAttributes};"""
-        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+
+        logTime = time.time()
         self.conn.execute(sqlCommand)
         # Commit transaction
         self.conn.commit()
+        self._logAction(sqlCommand, logTime)
 
     def insertIntoTable(self, name, attributes, values):
         sqlAttributes = "( recordID"
@@ -39,22 +47,30 @@ class EncryptedDatabase:
         sqlCommand = f"""INSERT OR IGNORE
                             INTO _{name} {sqlAttributes}
                             VALUES ({sqlValues});"""
-        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+        logTime = time.time()
+
         self.conn.execute(sqlCommand)
         self.conn.commit()
+        self._logAction(sqlCommand, logTime)
 
     # This method retrieves all entries from a table
     def retrieveRecords(self, name, records: list):
         sqlRecords = str(records).strip('[]')
-        
+
         sqlCommand = f"SELECT * FROM _{name} WHERE recordID IN ({sqlRecords});"
-        print("I saw that you ran this command!!!! >:))))", sqlCommand)
+
+        logTime = time.time()
         entries = self.conn.execute(sqlCommand).fetchall()
+        self._logAction(sqlCommand, logTime)
         return entries
     
 
     def getTableRecordLength(self, tableName):
+        logTime = time.time()
         entries = self.conn.execute(f"SELECT * FROM _{tableName}").fetchall()
+
+        self._logAction(f"SELECT * FROM _{tableName}", logTime)
+
         return len(entries)
     
     # This method checks if an entry already exists within a table
