@@ -1,3 +1,4 @@
+from termcolor import colored
 from users.Users import Writer, Reader
 from pymcl import pairing, g1,g2
 from database.QueryMultiplexer import QueryMutliplexer
@@ -24,7 +25,6 @@ def testScheme():
     qm = QueryMutliplexer(b'123')
     dh = DataHost(EncryptedDatabase(True))
 
-
     # init writer and readers
     print('Initializing users...')
     writer = Writer(qm, dh, "Alice")
@@ -33,6 +33,7 @@ def testScheme():
     print()
     reader2 = Reader(qm, dh, "Cathy")
     print('Completed initializing users!\n\n')
+    input()
 
     # table creation
     print('Adding records to db...')
@@ -45,11 +46,14 @@ def testScheme():
     # writer.updateDatabase(['Myron', 100, 11], True)
     # writer.updateDatabase(['Me', 12, 33], True)
     print('Completed adding records!\n\n')
+    input()
 
     # writer encrypt table test
     print('Encrypting table...')
     # curTime = time.time()
     writer.encrypt()
+    input()
+
     # endTime = time.time()
     # delta = endTime - curTime
     # print(f"Time difference is {delta} seconds")
@@ -59,20 +63,25 @@ def testScheme():
     print('Authorizing readers...')
     writer.delegate(reader.getPublicKey(), reader.id)
     print('Completed authorizing readers!\n\n')
+    input()
 
     # search query
     print('Generating trapdoors...')
     trapdoors = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
     print('Completed generating trapdoors!\n\n')
+    input()
 
     print('Transforming trapdoors...')
     tPrime = qm.transform(trapdoors, reader.id)
     print('Completed transforming trapdoors!\n\n')
+    input()
 
     print('Trapdoor search...')
     results = dh.search(tPrime)
     printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader.id)
     print('Completed trapdoor search!\n\n')
+    input()
+
 
     # print('Generating second trapdoors...')
     # trapdoors2 = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")

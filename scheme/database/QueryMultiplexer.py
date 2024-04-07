@@ -1,15 +1,16 @@
 from pymcl import pairing, Fr
+from termcolor import colored
 class QueryMutliplexer():
 
     def _auth(self, readerId):
-        print('QM: checking if',readerId,'is authorized...')
+        print(colored('QM', 'green'),'\t checking if',readerId,'is authorized...')
         authorizedWriters = []
         for writer in list(self._authorizations.keys()):
             if readerId in self._authorizations[writer]:
                 authorizedWriters.append(writer)
-                print('QM: authorized!',self._authorizations[writer])
+                print(colored('QM', 'green'),'\t authorized!',self._authorizations[writer])
         if not authorizedWriters:
-            print('QM: not authorized!')
+            print(colored('QM', 'green'),'\t not authorized!')
 
         return authorizedWriters
 
@@ -23,25 +24,25 @@ class QueryMutliplexer():
         """
         Add a given writer from their id and symmetric key
         """
-        print('QM: add writer [',id,'] with secret key [',symmetricKey,']')
+        print(colored('QM', 'green'),'\t add writer [',id,'] with secret key [',symmetricKey,']')
         self._writers.append((id, symmetricKey))
         self._authorizations[id] = {}
-        print('QM: done add writer')
+        print(colored('QM', 'green'),'\t done add writer')
 
     def addReader(self, publicKey: Fr, id: str):
-        print('QM: add reader [',id,'] with public key [',publicKey,']')
+        print(colored('QM', 'green'),'\t add reader [',id,'] with public key [',publicKey,']')
         self._readers.append((id, publicKey)) #prob need to add more authentication still
-        print('QM: done add reader')
+        print(colored('QM', 'green'),'\t done add reader')
     
     def delegate(self, auth, writerId, readerId):
-        print('QM:',writerId,'authorizes',readerId, '[',auth,']')
+        print(colored('QM', 'green'),'\t',writerId,'authorizes',readerId, '[',auth,']')
         if writerId not in self._authorizations:
             return False
         self._authorizations[writerId][readerId] = auth # replace this with the actual value
-        print('QM: done delegate')
+        print(colored('QM', 'green'),'\t done delegate')
     
     def transform(self, trapdoor, readerId):
-        print('QM: transform trapdoor', trapdoor,'for',readerId)
+        print(colored('QM', 'green'),'\t transform trapdoor', trapdoor,'for',readerId)
         authR = self._auth(readerId=readerId)
         tPrime = []
 
@@ -55,7 +56,7 @@ class QueryMutliplexer():
                 #oblivious transfer
                 tPrime.append((cRSW, kW, tableName))
 
-        print('QM: done transform',tPrime)
+        print(colored('QM', 'green'),'\t done transform',tPrime)
         return tPrime
     
     def filter(self, results):
@@ -63,7 +64,7 @@ class QueryMutliplexer():
 
     def printData(self):
         """Omega debug function"""
-        print('QM: print data')
+        print(colored('QM', 'green'),'\t print data')
         print("writers: ", self._writers)
         print("readers: ", self._readers)
         print("Authorizations:")

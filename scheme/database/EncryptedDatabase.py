@@ -11,7 +11,7 @@ class EncryptedDatabase:
         self.conn = sqlite3.connect('eDatabase.db')
     def _logAction(self, sqlAction, loggedTime):
         f = open("logs.txt", "a")
-        f.write("[" + time.ctime(loggedTime) +"]: " + sqlCommand)
+        f.write("[" + time.ctime(loggedTime) +"]: " + sqlAction)
         f.write("\n")
         f.close()
 
