@@ -32,6 +32,7 @@ class Writer(User):
     def __init__(self, queryMultiplexer, dataHost, id):
         print('New Writer:',id)
         self._secretKey = self._setup()
+        print('Writer: gen secret key [',self._secretKey,']')
         self._database = Database(True)
         self._database.create_tables()
         super().__init__(queryMultiplexer, dataHost, id)
@@ -89,6 +90,8 @@ class Reader(User):
         publicKey, privateKey, kR = self._setup()
         self._publicKey = publicKey
         self._privateKey = privateKey
+        print('Reader: gen public key [',self._publicKey,']')
+        print('Reader: gen private key [',self._privateKey,']')
         self._kR = kR
         super().__init__(queryMultiplexer, dataHost, id)
         self.QM.addReader(self._publicKey, self.id)
@@ -105,7 +108,7 @@ class Reader(User):
         return test
         # yield Exception("need to implement this")
     def trapdoor(self, sqlStatement):
-        print('Reader: generate trapdoor for [',sqlStatement,']')
+        print('Reader: generate trapdoor for [',sqlStatement,'] using priv key')
         test = generateTrapdoor(sqlStatement, self._privateKey) # nuh uh
         print('Reader: done generate trapdoor')
         return test

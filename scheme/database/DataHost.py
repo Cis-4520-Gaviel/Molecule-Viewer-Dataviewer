@@ -25,11 +25,11 @@ class DataHost:
         print('DH: done upload index')
 
     def encryptTable(self, database: Database, tableName, k, secretKey, realTableName):
-        print('DH: encrypt table')
+        print('DH: generate index for table')
         keywordList, n = CreateDictionary(database, realTableName)
         I = BuildIndexNewHash(keywordList, n, K=k, Klen=256, secretKey=secretKey)
         self._encryptedIndexes[tableName] = I
-        print('DH: done encrypt table')
+        print('DH: done generate index')
 
     def registerNewTable(self, tableName: str, attributes: list):
         """
@@ -51,7 +51,7 @@ class DataHost:
         self._encryptedTableAttributes[tableName] = encryptedAttributes
 
         self._database.createTable(tableName, encryptedAttributes)
-        print('DH: done register new table')
+        print('DH: done register new table [',tableName,'] with attributes',encryptedAttributes)
 
     def addNewValuesToTable(self, tableName, values):
         print('DH: add new values to table')
@@ -68,11 +68,11 @@ class DataHost:
             encryptedValues.append(encValue)
 
         self._database.insertIntoTable(tableName, self._encryptedTableAttributes[tableName], encryptedValues)
-        print('DH: done add new values')
+        print('DH: done add new values [',encryptedValues,']')
 
 
     def search(self, t):
-        print('DH: search for [',t,']')
+        print('DH: start search')
         cipher = aead.AESSIV(self._masterKey)
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
         ids = set(())
@@ -82,13 +82,19 @@ class DataHost:
         (temp, temp1, tableName) = t[0]
         for trapdoor in t:
             (pos, k, tName) = trapdoor
-            ids.update(Search(self._encryptedIndexes[tName.serialize().hex()], (pos, k)))
+            print('DH: get pos and sql table name from trapdoor')
+            print('DH: searching for pos [',pos,'] in table [',tName.serialize().hex(),']')
+            print()
+            results = Search(self._encryptedIndexes[tName.serialize().hex()], (pos, k))
+            ids.update(results)
+            print()
         records = []
         if(len(ids) > 0):
             records = self._database.retrieveRecords(tableName.serialize().hex(), list(ids))
             newVals = []
             for record in records:
                 relevantRecords = record[1:]
+                print('DH: decrypt',record)
                 unencryptedRecord = []
                 for val in relevantRecords:
                     unencryptedRecord.append(cipher.decrypt(bytes.fromhex(val),[]).decode('utf-8'))

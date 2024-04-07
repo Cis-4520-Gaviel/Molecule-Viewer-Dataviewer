@@ -2,11 +2,15 @@ from pymcl import pairing, Fr
 class QueryMutliplexer():
 
     def _auth(self, readerId):
+        print('QM: checking if',readerId,'is authorized...')
         authorizedWriters = []
         for writer in list(self._authorizations.keys()):
             if readerId in self._authorizations[writer]:
                 authorizedWriters.append(writer)
-        
+                print('QM: authorized!',self._authorizations[writer])
+        if not authorizedWriters:
+            print('QM: not authorized!')
+
         return authorizedWriters
 
     def __init__(self, masterKey):
@@ -19,18 +23,18 @@ class QueryMutliplexer():
         """
         Add a given writer from their id and symmetric key
         """
-        print('QM: add writer [',id,']')
+        print('QM: add writer [',id,'] with secret key [',symmetricKey,']')
         self._writers.append((id, symmetricKey))
         self._authorizations[id] = {}
         print('QM: done add writer')
 
     def addReader(self, publicKey: Fr, id: str):
-        print('QM: add reader [',id,']')
+        print('QM: add reader [',id,'] with public key [',publicKey,']')
         self._readers.append((id, publicKey)) #prob need to add more authentication still
         print('QM: done add reader')
     
     def delegate(self, auth, writerId, readerId):
-        print('QM:',writerId,'authorizes',readerId)
+        print('QM:',writerId,'authorizes',readerId, '[',auth,']')
         if writerId not in self._authorizations:
             return False
         self._authorizations[writerId][readerId] = auth # replace this with the actual value
@@ -51,7 +55,7 @@ class QueryMutliplexer():
                 #oblivious transfer
                 tPrime.append((cRSW, kW, tableName))
 
-        print('QM: done transform [',tPrime,']')
+        print('QM: done transform',tPrime)
         return tPrime
     
     def filter(self, results):
@@ -65,3 +69,4 @@ class QueryMutliplexer():
         print("Authorizations:")
         for writer in self._authorizations:
             print(writer, self._authorizations[writer])
+

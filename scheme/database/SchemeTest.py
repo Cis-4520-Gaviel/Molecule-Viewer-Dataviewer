@@ -28,7 +28,9 @@ def testScheme():
     # init writer and readers
     print('Initializing users...')
     writer = Writer(qm, dh, "Alice")
+    print()
     reader = Reader(qm, dh, "Bob")
+    print()
     reader2 = Reader(qm, dh, "Cathy")
     print('Completed initializing users!\n\n')
 
@@ -72,31 +74,31 @@ def testScheme():
     printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader.id)
     print('Completed trapdoor search!\n\n')
 
-    print('Generating second trapdoors...')
-    trapdoors2 = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")
-    print('Completed generating second trapdoors!\n\n')
+    # print('Generating second trapdoors...')
+    # trapdoors2 = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")
+    # print('Completed generating second trapdoors!\n\n')
 
-    print('Transforming second trapdoors...')
-    tPrime2 = qm.transform(trapdoors2, reader.id)
-    print('Completed transforming second trapdoors!\n\n')
+    # print('Transforming second trapdoors...')
+    # tPrime2 = qm.transform(trapdoors2, reader.id)
+    # print('Completed transforming second trapdoors!\n\n')
     
-    print('Second trapdoor search...')
-    results2 = dh.search(tPrime2)
-    printResults(results2, "SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';", reader.id)
-    print('Completed second trapdoor search!\n\n')
+    # print('Second trapdoor search...')
+    # results2 = dh.search(tPrime2)
+    # printResults(results2, "SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';", reader.id)
+    # print('Completed second trapdoor search!\n\n')
 
-    print('Generating bad trapdoor...')
-    badTrapdoor = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
-    print('Completed generating bad trapdoor!\n\n')
+    # print('Generating bad trapdoor...')
+    # badTrapdoor = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
+    # print('Completed generating bad trapdoor!\n\n')
 
-    print('Transforming bad trapdoor...')
-    badTPrime = qm.transform(badTrapdoor, reader2.id)
-    print('Completed transforming bad trapdoor!\n\n')
+    # print('Transforming bad trapdoor...')
+    # badTPrime = qm.transform(badTrapdoor, reader2.id)
+    # print('Completed transforming bad trapdoor!\n\n')
 
-    print('Bad trapdoor search... (unauthorized Cathy searches)')
-    badResults = dh.search(badTPrime)
-    printResults(badResults, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader2.id)
-    print('Completed bad trapdoor search!\n\n')
+    # print('Bad trapdoor search... (unauthorized Cathy searches)')
+    # badResults = dh.search(badTPrime)
+    # printResults(badResults, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader2.id)
+    # print('Completed bad trapdoor search!\n\n')
 
 
     qm.printData()
