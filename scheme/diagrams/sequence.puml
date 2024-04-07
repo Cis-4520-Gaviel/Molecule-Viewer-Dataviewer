@@ -18,6 +18,7 @@ deactivate Writer
 Reader->Reader: keygen
 activate Reader
 Reader->QM: addReader(publicKey, id)
+Reader->DH: addReader(id, secretKey)
 deactivate Reader
 == Encrypt ==
 Writer->DH: Encrypt(Database, keys)

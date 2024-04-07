@@ -1,24 +1,26 @@
 @startuml scheme
 class User
 User : id: str
+class UntrustedDatabase
 class Reader
 class Writer
 class Database
 class QueryMultiplexer
 class DataHost
-class EncryptedIndex 
-class UntrustedDatabase
 
 Reader : secretKey
 Reader : PublicKey : G2
 Reader : PrivateKey : Fr
 
 Writer : secretKey
-DataHost o-- Reader
 DataHost : readerKeys : dict
 DataHost : encryptedIndecies : dict
-DataHost : Search (trapdoor)
+DataHost : encryptedTableAttributes : dict
+DataHost : EncryptedDatabase
 DataHost : UploadIndex (index)
+DataHost : registerNewTable (tableName, attributes)
+DataHost : addNewValuesToTable ()
+DataHost : Search (trapdoor)
 
 QueryMultiplexer : writers : list
 QueryMultiplexer : readers : list
@@ -28,18 +30,23 @@ QueryMultiplexer : addReader (id, key)
 QueryMultiplexer : delegate (auth, writerId, readerId)
 QueryMultiplexer : transform (trapdoor, readerId)
 
+UntrustedDatabase : Database
+UntrustedDatabase : createTable (name, attributes)
+UntrustedDatabase : insertIntoTable (name, attributes, values)
+UntrustedDatabase : retrieveRecords (name, records)
+UntrustedDatabase : getTableRecordLength(name)
+
 Writer : delegate (readerPublicKey, readerId)
 Writer : encrypt (tableName)
 Writer : updateDatabase (values)
 
 Reader : trapdoor (sqlStatement)
 
-QueryMultiplexer o-- Reader
-DataHost o-- Writer
+UntrustedDatabase --* DataHost
+DataHost *-* QueryMultiplexer
+QueryMultiplexer o-- User
+DataHost o-- User
 User <-- Reader
 User <-- Writer
-Writer o-- Database
-DataHost o-- EncryptedIndex
-QueryMultiplexer *--* DataHost
-DataHost *-- UntrustedDatabase
+Writer o- Database
 @enduml
