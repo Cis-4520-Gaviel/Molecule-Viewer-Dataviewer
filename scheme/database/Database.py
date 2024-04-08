@@ -5,10 +5,10 @@ import sqlite3
 class Database:
 
     # Constructor
-    def __init__(self, reset=False):
-        if reset == True and os.path.exists('molecules.db'):
-            os.remove('molecules.db')
-        self.conn = sqlite3.connect('molecules.db')
+    def __init__(self, id = "molecules",reset=False):
+        if reset == True and os.path.exists(f'{id}.db'):
+            os.remove(f'{id}.db')
+        self.conn = sqlite3.connect(f'{id}.db')
 
     # This method creates tables
     def create_tables(self):

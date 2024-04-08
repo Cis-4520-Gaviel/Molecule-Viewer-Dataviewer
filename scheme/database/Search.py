@@ -12,8 +12,10 @@ def Search(I, minecraftdoor):
 
     # Locate entry T[pos]
     print('lookup node address at pos [',str(pos),'] in table T')
-    theta = T[str(pos)]
-
+    try:
+        theta = T[str(pos)]
+    except:
+        return []
     # Parse a||k = theta xor Kw (for each node)
     node = theta[0]
     (addr, kHead) = node #retrieve addr and k of node

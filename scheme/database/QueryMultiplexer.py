@@ -1,5 +1,6 @@
-from pymcl import pairing, Fr
+from pymcl import pairing, Fr, g1, G1
 from termcolor import colored
+from DataHost import DataHost
 class QueryMutliplexer():
 
     def _auth(self, readerId):
@@ -8,9 +9,10 @@ class QueryMutliplexer():
         for writer in list(self._authorizations.keys()):
             if readerId in self._authorizations[writer]:
                 authorizedWriters.append(writer)
-                print(colored('QM', 'green'),'\t authorized!',self._authorizations[writer])
+                print(colored('QM', 'green'),'\t',writer ,' has authorized!',self._authorizations[writer])
         if not authorizedWriters:
             print(colored('QM', 'green'),'\t not authorized!')
+            pass
 
         return authorizedWriters
 
@@ -41,33 +43,47 @@ class QueryMutliplexer():
         self._authorizations[writerId][readerId] = auth # replace this with the actual value
         print(colored('QM', 'green'),'\t done delegate')
     
-    def transform(self, trapdoor, readerId):
-        print(colored('QM', 'green'),'\t transform trapdoor', trapdoor,'for',readerId)
+    def transform(self, trapdoor, readerId, dataHost : DataHost = None ):
+        print(colored('QM - GET', 'green'),'\t transform trapdoor', trapdoor,'for',readerId)
         authR = self._auth(readerId=readerId)
-        tPrime = []
+        tPrimePrime = []
 
-        for t in trapdoor:
-            (pos, kW, tableName) = t
-            for w in authR:
-                # print(pos.__class__)
-                cRSW = pairing(pos, self._authorizations[w][readerId])
-                tableName = pairing(tableName, self._authorizations[w][readerId])
+        for w in authR:
+            tPrime = []
+            for t in trapdoor:
+                (pos, kW, tableName) = t
+                # #print(tableName)
+                # #print(pos.__class__)
+                try:
+                    cRSW = pairing(pos, self._authorizations[w][readerId])
+                    tableName = pairing( tableName, self._authorizations[w][readerId])
+                except:
+                    continue
+        
                 #create zsgbf
                 #oblivious transfer
                 tPrime.append((cRSW, kW, tableName))
+            tPrimePrime.append(tPrime)
 
-        print(colored('QM', 'green'),'\t done transform',tPrime)
-        return tPrime
+        print(colored('QM', 'green'),'\t done transform',tPrimePrime)
+        if(dataHost is None):
+            return tPrimePrime
+        
+        ids, results = dataHost.search(tPrimePrime)
+        print(colored('QM - RECIEVE', 'green'),'\t recieved searched results:',results)
+
+        return ids, results
     
     def filter(self, results):
         yield Exception("not implemented yet")
 
     def printData(self):
         """Omega debug function"""
-        print(colored('QM', 'green'),'\t print data')
+        print(colored('QM', 'green'),'\t #print data')
         print("writers: ", self._writers)
         print("readers: ", self._readers)
         print("Authorizations:")
         for writer in self._authorizations:
             print(writer, self._authorizations[writer])
+            pass
 

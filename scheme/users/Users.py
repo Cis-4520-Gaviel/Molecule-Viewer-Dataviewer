@@ -35,7 +35,7 @@ class Writer(User):
         print('New Writer:',id)
         self._secretKey = self._setup()
         print(colored('Writer', 'green'),'\t gen secret key [',self._secretKey,']')
-        self._database = Database(True)
+        self._database = Database(id,True)
         self._database.create_tables()
         super().__init__(queryMultiplexer, dataHost, id)
         self.QM.addWriter(self._secretKey, self.id)
@@ -105,12 +105,7 @@ class Reader(User):
         return self._publicKey
     
     def trapdoor(self, sqlStatement):
-        print(colored('Reader', 'green'),'\t trapdoor1')
-        test = generateTrapdoorBLS12381(sqlStatement, self._privateKey) # nuh uh
-        return test
-        # yield Exception("need to implement this")
-    def trapdoor(self, sqlStatement):
         print(colored('Reader', 'green'),'\t generate trapdoor for [',sqlStatement,'] using priv key')
-        test = generateTrapdoor(sqlStatement, self._privateKey) # nuh uh
-        print(colored('Reader', 'green'),'\t done generate trapdoor')
-        return test
+        t = generateTrapdoor(sqlStatement, self._privateKey) # nuh uh
+        print(colored('Reader - POST', 'green'),'\t done generate trapdoor, sending to QM: ', t)
+        return self.QM.transform(t, self.id, self.DH)
