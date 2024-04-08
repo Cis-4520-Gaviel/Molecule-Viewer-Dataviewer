@@ -77,32 +77,36 @@ class DataHost:
         print(colored('DH', 'green'),'\t start search')
         cipher = aead.AESSIV(self._masterKey)
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
-        ids = set(())
+        tableIds = set(())
         if(len(t) == 0):
             print(colored('DH', 'green'),'\t search fail!')
-            return ids, []
-        (temp, temp1, tableName) = t[0]
-        for trapdoor in t:
-            (pos, k, tName) = trapdoor
-            print(colored('DH', 'green'),'\t get pos and sql table name from trapdoor')
-            print(colored('DH', 'green'),'\t searching for pos [',pos,'] in table [',tName.serialize().hex(),']')
-            print()
-            results = Search(self._encryptedIndexes[tName.serialize().hex()], (pos, k))
-            ids.update(results)
-            print()
-        records = []
-        if(len(ids) > 0):
-            records = self._database.retrieveRecords(tableName.serialize().hex(), list(ids))
-            newVals = []
-            for record in records:
-                relevantRecords = record[1:]
-                print(colored('DH', 'green'),'\t decrypt',record)
-                unencryptedRecord = []
-                for val in relevantRecords:
-                    unencryptedRecord.append(cipher.decrypt(bytes.fromhex(val),[]).decode('utf-8'))
-                newVals.append(unencryptedRecord)
-            records = newVals
+            return tableIds, []
+        allRecords = []
+        for tPrime in t:
+            ids = set(())
+            (temp, temp1, tableName) = tPrime[0]
+            for trapdoor in tPrime:
+                (pos, k, tName) = trapdoor
+                print(colored('DH', 'green'),'\t get pos and sql table name from trapdoor')
+                print(colored('DH', 'green'),'\t searching for pos [',pos,'] in table [',tName.serialize().hex(),']')
+                print()
+                results = Search(self._encryptedIndexes[tName.serialize().hex()], (pos, k))
+                ids.update(results)
+                print()
+            records = []
+            if(len(ids) > 0):
+                records = self._database.retrieveRecords(tableName.serialize().hex(), list(ids))
+                newVals = []
+                for record in records:
+                    relevantRecords = record[1:]
+                    print(colored('DH', 'green'),'\t decrypt',record)
+                    unencryptedRecord = []
+                    for val in relevantRecords:
+                        unencryptedRecord.append(cipher.decrypt(bytes.fromhex(val),[]).decode('utf-8'))
+                    newVals.append(unencryptedRecord)
+                allRecords.append(newVals)
+                tableIds.update(ids)
         
-        print(colored('DH', 'green'),'\t done search [',ids,records,']')
-        return ids, records
+        print(colored('DH', 'green'),'\t done search [',ids,allRecords,']')
+        return ids, allRecords
     
