@@ -1,5 +1,11 @@
 import sqlparse
+
 def getNextNonWhitespaceToken(token, i, at = 0):
+    """
+    Takes an sqltoken (the beginning token) and two offsets. i is the value we start from
+    at is the value we compare to. The reason why we have two indicies is because the weird nature of skip_ws = true
+    where it extends any non whitepsace tokens to take up multiple indecies
+    """
     # print("finding next token after", str(getTokenAtIndex(token, at)))
     while (token.token_next(i, skip_ws=False)[1] is not None):
         i = i + 1
@@ -18,6 +24,9 @@ def getTokenAtIndex(token, i, skip_ws = False):
     return token.token_next(i, skip_ws=skip_ws)[1]
 
 def getNonWhitespaceTokens(tokens):
+    """
+    Removes any whitespace tokens and returns the processed array
+    """
     arr = []
     for tok in tokens:
         # print(str(tok), ":" , tok.ttype)
@@ -30,7 +39,44 @@ def getNonWhitespaceTokens(tokens):
     return arr
 
 
+def getSelectKeywords(sql):
+    """
+    This basically extracts the search keywords out of an sql statement. 
+    DO NOT supply statements which do not contain statements. There is no error handling currently
+    """
+
+    # print(sql)
+    output = sqlparse.format(sql, reindent=True)
+    # print(output)
+    tokens = sqlparse.parse(sql)
+    # print('Tokens:',tokens[0].tokens)
+    for token in tokens[0].tokens:
+        if(isinstance(token, sqlparse.sql.Where)):
+            temp = ""
+            token2 = token
+            i = 1
+            while(token2.token_next(i, skip_ws=False)[1] is not None):
+                curToken = token2.token_next(i, skip_ws=False)[1]
+                # print(curToken, curToken.ttype, curToken.value, curToken.__class__)
+                # if isinstance(curToken, sqlparse.sql.Identifier) or isinstance(curToken, sqlparse.sql.Token):
+                if str(curToken) != " " and str(curToken) != ";":
+                    temp += str(curToken)
+                        
+                i = i + 1
+            # print(token.token_next(1)[1])
+            # print("output: ",temp)
+            # print("comparisons:", temp.split("AND"))
+            return temp.split("OR")
+            # nextToken = token.token_next(1)
+            # print('Occurrances',nextToken)
+            # print(nextToken[1])
+            # print("JALSDJFLKAJD")
+        # print("\nstuff", token)
+
 def parseCreateStatement(sqlStatement):
+    """
+    Takes in a simple CREATE TABLE sql statement and returns the table name, as well as the attributes.
+    """
     # print(sqlStatement)
     sections = sqlparse.format(sqlStatement, reindent=True, keyword_case='upper')
     # for thing in sections:
@@ -46,30 +92,32 @@ def parseCreateStatement(sqlStatement):
     stage = 1
     tableName = ""
     tableAttributes = []
-    while (token.token_next(i, skip_ws=False)[1] is not None):
+
+    while (token.token_next(i, skip_ws=False)[1] is not None): # go through each token in the sql statement
         curToken = token.token_next(i, skip_ws=False)[1]
         i = i+1
-        if (curToken.ttype == sqlparse.tokens.Whitespace or curToken.ttype == sqlparse.tokens.Newline):
+        if (curToken.ttype == sqlparse.tokens.Whitespace or curToken.ttype == sqlparse.tokens.Newline): #skip any newlines or whitespace
             continue
 
         if(stage == 1): # retrieve table name
-            if(str(curToken) != "TABLE"):
+            if(str(curToken) != "TABLE"):       #skip any token that is not TABLE
                 continue
             tableNameIdx = i
             
+            #finding the table name, as a token - the ttype will be none
             while(True):
                 newIndex = getNextNonWhitespaceToken(token, tableNameIdx, i)
                 tableNameIdx = newIndex
                 if(getTokenAtIndex(token, tableNameIdx, skip_ws=True).ttype == None): # identifier found
                     break
             
-            tableName = str(getTokenAtIndex(token, tableNameIdx, skip_ws=True))
+            tableName = str(getTokenAtIndex(token, tableNameIdx, skip_ws=True)) #set table name
             i = tableNameIdx + 1
-            stage = 2
+            stage = 2           #next stage
             continue
         
         elif (stage == 2): # retrieve attributes
-            if(curToken.ttype != None):
+            if(curToken.ttype != None): #skip any token - the attributes will also be type none
                 continue
             # print(str(curToken), curToken.tokens, i)
             attributeList = getNonWhitespaceTokens(curToken)
@@ -81,8 +129,12 @@ def parseCreateStatement(sqlStatement):
 
     print("table:",tableName)
     print("attributes:",tableAttributes)
+    return tableName,tableAttributes
 
 def parseInsertStatement(sqlStatement):
+    """
+    Takes in a simple INSERT INTO sql statement and returns the table name, as well as the values inserted.
+    """
     # print(sqlStatement)
     sections = sqlparse.format(sqlStatement, reindent=True, keyword_case='upper')
     # for thing in sections:
@@ -137,6 +189,7 @@ def parseInsertStatement(sqlStatement):
         # print(curToken, curToken.ttype)
     print("table:",tableName)
     print("values:",tableAttributes)
+    return tableName, tableAttributes
 
 if __name__ == "__main__":
     parseCreateStatement("""CREATE TABLE IF NOT EXISTS Molecules 

@@ -1,9 +1,9 @@
-from Database import *
+from database.Database import *
 from KeyGen import *
-from CreateDictionary import *
-from BuildIndex import *
-from Trapdoor import *
-from Search import *
+from users.CreateDictionary import *
+from users.BuildIndex import *
+from users.Trapdoor import *
+from database.Search import *
 
 # Create test database
 D = Database(reset=True)
@@ -25,7 +25,7 @@ K = KeyGen(Klen) # K = (Kpsi, Kpi, Kphi)
 
 # Test CreateDictionary
 print('Testing CreateDictionary...')
-W, n = CreateDictionary(D)
+W, n = CreateDictionary(D, 'Molecules')
 print(W)
 # print('Indexing...')
 # for i in range(1, n+1):

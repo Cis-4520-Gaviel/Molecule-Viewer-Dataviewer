@@ -1,75 +1,72 @@
 import os
-from Node import Node
-from AESCTR import AESCTR
+from utils.Node import Node
+from utils.AESCTR import AESCTR
 from cuckoopy import CuckooFilter
-from CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction, get_xor
+from utils.CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce, phiFunction
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
-from CreateDictionary import GetKeyAtValue
+from users.CreateDictionary import GetKeyAtValue
 from itertools import cycle
-
-mockVal = bytes('aa', 'utf-8')
-
-GCMIV = os.urandom(12)
+from pymcl import pairing, g1, g2, Fr
 
 # Generate a search index I
-def BuildIndex(W,n,K,Klen):
+def BuildIndex(W: dict, n: int, K: tuple, Klen: int, secretKey: Fr, debugDetailed = False):
     """
-    Kpsi is used to generate addresses, key for PRP
-    Kpi is used for address of lookup table, key for PRP
-    Kphi is used to encrypt values, key for PRF
-    """
+    Builds an encrypted index to allow searching over an encrypted database Name='Fire'
 
+    Params: W - a dictionary of keywords, each mapping to an array of records which contain keyword.
+
+    n - the number of values in the dataset. Should be greater than the total number of record ids in W.
+
+    K - the tuple of secret keys related to building the index.
+        Kpsi is used to generate addresses, key for PRP.
+        Kpi is used for address of lookup table, key for PRP.
+        Kphi is used to encrypt values, key for PRF.
+
+    Klen - length of the keys to generate when encrypting the index.
+
+    secretKey - a pairings secret key to encrypt keywords in final step.
+
+    """
     ctr = 1 # Set global counter
 
-    m = 100
+    m = n * n * 2 + 113
     A = [None] * m # Array A creation
 
     (Kpsi, Kpi, Kphi) = K # retrieve keys
     nodes = [] # keeping track of each node (address in A and key)
-    ids = [] # keeping track of traversed ids
     
     PsiCipher = AESCTR(Kpsi) # cipher for the PRP we use for ordering the array elements
 
-    # Traverse each keyword
-    for i in range(1, n+1):
-
-        keyword = GetKeyAtValue(W, i) # get keyword
-        print('at keyword:', keyword)
-
-        #create linked list and the address of n1,j
-        # addressGenerator = PsiCipher.encryptor((1).to_bytes(16, "big"))
-        # head = addressGenerator.encrypt(ctr.to_bytes(16, "big"))
-        # print('head:',head)
-
+    # Traverse each keyword in dataset
+    for keyword, ids in W.items():
         kHead = os.urandom(Klen // 8) # generate random key ki,0 for first node
 
         # generate address in A for first node using key Kpsi
-        psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
-        psiCtr = psuedoRandomPerm.encrypt(ctr.to_bytes(16, "big"))
-        # print(int.from_bytes(curAddr, 'big') % 1000)
-        addrHead = int.from_bytes(psiCtr, 'big') % m
+        while(True):
+            psiCtr = PsiCipher.encryptor().encrypt(ctr.to_bytes(16, "big"))
+            addrHead = int.from_bytes(psiCtr, 'big') % m
+            if(A[addrHead] is None):
+                break
+            ctr = ctr + 1
+        # #print("W_I:", keyword)
 
         # Traverse ids (vals) of keywords
-        for j in range(len(W[keyword])):
-
-            id = W[keyword][j] # retrieve record id
-
-            if id in ids: # check if id already traversed
-                print('id', W[keyword][j], 'already exists!\n')
-                continue
-            else:
-                ids.append(id)
-            
-            # print('encrypt id:', W[keyword][j], 'from j index', j)
+        j=0
+        nodes.append((addrHead.to_bytes(10, 'big'), kHead))
+        for id in ids:
+            # ##print('encrypt id:',id)
             kNext = os.urandom(Klen // 8) # generate key ki,j to encrypt/decrypt next node
 
             # if not last node in list, generate address of next node using key Kpsi
             if(j != len(W[keyword]) - 1):
-                print('gen address for next node')
-                psuedoRandomPerm = PsiCipher.encryptor((1).to_bytes(16, "big"))
-                psiCtr = psuedoRandomPerm.encrypt((ctr + 1).to_bytes(16, "big"))
-                addrNext = int.from_bytes(psiCtr, 'big') % m
-                # node.setNextAddress(psiCtr)
+                while(True):
+
+                    # ##print('gen address for next node')
+                    psiCtr = PsiCipher.encryptor().encrypt((ctr + 1).to_bytes(16, "big"))
+                    addrNext = int.from_bytes(psiCtr, 'big') % m
+                    if(A[addrNext] is None):
+                        break
+                    ctr = ctr + 1
             else:
                 addrNext = None # last node
 
@@ -77,105 +74,48 @@ def BuildIndex(W,n,K,Klen):
             node = Node(id, kNext, addrNext)
 
             # Encrypt current node (N'ij) using prev key
-            aessiv = AESSIV(kHead) #encrypting each node with non deterministic encryptor
-            # nonce = os.urandom(16)      #generating a 128-bit nonce
-            print('encrypt node:',node)
-            ct = aessiv.encrypt(bytes(str(node),'utf-8'), None) #use AESSIV for undeterministic symmetric encryption
+            print('N(recID, kNext, addrNext):',node, " addr:", addrHead)
+            ct = AESSIVEncryptNonce(kHead, str(node)) #use AESSIV for undeterministic symmetric encryption
 
-            # if(A[nodeIndex] is not None): # debugging, print if we have a collision
-            #     print('Debug: Collision found')
+            if(A[addrHead] is not None): # debugging, ##print if we have a collision
+                ##print('Debug: Collision found')
+                raise Exception("Collision Detected")
 
             # Store node in A (pseudorandom order)
             A[addrHead] = ct
-            print('store encrypted node at address', addrHead)
-            # print('A:', A)
 
             # store current node info (address in A, key) for lookuptable
-            nodes.append((addrHead.to_bytes(1, 'big'), kHead))
-
             kHead = kNext # next node key
             addrHead = addrNext # next node address in A
 
             ctr = ctr+1 # increment counter
-            print()
+            j=j+1
+        # #print()
 
-    # TODO: Fill in remaining entries of A with rando values
+    # TODO: Fill in remaining entries of A with random values
 
-    # Look up table T creation
+    # Look up table T creation for heads of each linked list
     T = {} # unsecure lookup table ! should use a secure table like cuckoo table
-    ids = [] # reset traversed ids
     nodeIndex = 0
-    # TODO: store info in T in pseudorandom order using key Kpi
-    for i in range(1, n+1):
-        keyword = GetKeyAtValue(W, i) #retrieve keyword
-        # print('encrypt keyword:', keyword)
 
-        # Traverse ids (vals) of keywords
-        for j in range(len(W[keyword])):
-            id = W[keyword][j] # retrieve record id
+    for keyword, ids in W.items():
 
-            if id in ids: # check if id already traversed
-                # print('id', W[keyword][j], 'already exists!\n')
-                continue
-            else:
-                ids.append(id)
+        Ki = phiFunction(Kphi, keyword) #get key Ki to xor everything
+        pos = pairing(g1.hash(bytes(keyword, 'utf-8')), g2 * secretKey)
 
-            Ki = phiFunction(Kphi, keyword) #get key Ki
+        (addr, k) = nodes[nodeIndex] #retrieve addr in A and k of node
+        # value = get_xor(addr + k, Ki) # combine addr+k, xor with val
+        addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
+        k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
 
-            (addr, k) = nodes[nodeIndex] #retrieve addr in A and k of node
-            # print('get addr:', addr, 'of type', type(addr))
-            # print('real address:', int.from_bytes(addr,'big'))
-            # print('get k:', k, 'of type', type(k))
-            # print('get Ki', Ki, 'of type', type(Ki))
-
-            # value = get_xor(addr + k, Ki) # combine addr+k, xor with val
-            addr = bytes(addr ^ Ki for addr, Ki in zip(addr, cycle(Ki))) #addr xor Ki
-            k = bytes(k ^ Ki for k, Ki in zip(k, cycle(Ki))) #k xor Ki
-
-            if keyword in T:
-                T[keyword].append((addr, k)) # add to value list of keyword
-            else:
-                T[keyword] = [(addr, k)] # create new value list for keyword
-            
-            nodeIndex = nodeIndex+1
-    
+        T[str(pos)] = [(addr, k)] # create new value list for keyword
+        nodeIndex = nodeIndex + 1
 
     I = (A, T)
-
+    print("=====Index Created=====\nArray A length:", len(A), "\nLookup Table T length:", len(T.keys()))
+    if(debugDetailed):
+        #print(I)
+        pass
+        
     return I
-
-
-
-def EncryptTable(T, K):
-    attributes = ['stuff', 'stuff2'] # mock data
-
-    for attribute in attributes:
-        encryptedAttribute = AESSIVEncryptNonce(K, attribute)
-    
-    records = [('value1', 'value2'), ('value3', 'value4')] # mock data
-    for i in range(len(records)):
-        record = records[i]
-        for value in record:
-            encryptedValue = AESSIVEncryptNonce(K, value)
-
-def DecryptTable(T, K):
-    attributes = ['stuff', 'stuff2'] # mock data
-
-    for attribute in attributes:
-        decryptedAttribute = AESSIVDecryptNonce(K, attribute)
-    
-    records = [('value1', 'value2'), ('value3', 'value4')] # mock data
-    for i in range(len(records)):
-        record = records[i]
-        for value in record:
-            decryptedValue = AESSIVDecryptNonce(K, value)
-    
-
-
-
-# testKey = os.urandom(32)
-# testVar = AESSIVEncryptNonce(testKey, 'among us')
-# print(testVar.hex())
-# result = AESSIVDecryptNonce(testKey, testVar)
-# print(result)
 

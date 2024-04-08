@@ -1,48 +1,45 @@
 from itertools import cycle
-from cryptography.hazmat.primitives.ciphers.aead import AESSIV
 import os
-
+from utils.CryptoUtils import AESSIVDecryptNonce
+from utils.CryptoUtils import xor
+from utils.Node import Node
 # Search over the search index I using the search token generated with
 # algorithm Trapdoor
 def Search(I, minecraftdoor):
 
-    (A, T) = I # parse index
-    (pos,Kw) = minecraftdoor[0] # parse trapdoor
-    print('Searching:', pos)
-
-    # for k,v in T.items():
-    #     print(k,v)
+    (A, T) = I # parse index into A array and T lookup table
+    (pos,Kw) = minecraftdoor # parse trapdoor
 
     # Locate entry T[pos]
-    theta = T[pos]
-    # print('value:',theta)
-
-    R = [] # keeping track of record ids
-
+    print('lookup node address at pos [',str(pos),'] in table T')
+    try:
+        theta = T[str(pos)]
+    except:
+        return []
     # Parse a||k = theta xor Kw (for each node)
-    for node in theta:
-        (addr, k) = node #retrieve addr and k of node
-        # print(addr)
-        # print(k)
+    node = theta[0]
+    (addr, kHead) = node #retrieve addr and k of node
+    nextAddr = int.from_bytes(xor(addr, Kw), 'big')
+    print('get node address [',addr,'] and xor')
+    print('locating node at address [',nextAddr,'] in A')
+    nextKey = xor(kHead, Kw)
 
-        # T[pos] (theta split into addr and k) xor Kw
-        # print(type(addr), type(Kw))
-        addr = bytes(addr ^ Kw for addr, Kw in zip(addr, cycle(Kw))) #addr xor Kw
-        k = bytes(k ^ Kw for k, Kw in zip(k, cycle(Kw))) #k xor Kw
-        # print('retrieve addr:', addr)
-        # print('real address:', int.from_bytes(addr,'big'))
-        # print('retrieve k:', k)
+    results = []
 
-        # Decrypt linkedlist L with first node A[a] encrypted under key k
-        # Decrypt all nodes from address
-        aessiv = AESSIV(k) #decrypting each node with non deterministic encryptor
-        ct = A[int.from_bytes(addr, 'big')] # retrieve ct
-        # print('encrypted node:', ct)
-        node = aessiv.decrypt(ct, None)
-        print('decrypted node:',node.decode().split(' '))
+    while(nextAddr is not None):
+        try:
+            N = A[nextAddr]
+        except:
+            print("Address not found!!!!")
+            return results
+        
+        node = AESSIVDecryptNonce(nextKey, N)
+        curNode = Node.parseString(str(node.decode()))
+        results.append(curNode.recordID)
+        print('hit! [',curNode.recordID,'] at node address [',nextAddr,']')
+        nextAddr = curNode.addressNext
+        nextKey = curNode.kNext
 
-        R.append(node.decode().split(' ')[0]) # add record id to list
-
-    return R # return encrypted records that match search criterion w
+    return results # return encrypted records that match search criterion w
 
 

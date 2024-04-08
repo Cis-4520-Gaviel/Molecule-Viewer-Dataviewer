@@ -28,3 +28,6 @@ molecule_wrap.c
 molecules.db
 /__pycache__/
 *.pyc
+eDatabase.db
+logs.txt
+*.db
