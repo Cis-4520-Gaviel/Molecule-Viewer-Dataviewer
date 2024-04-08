@@ -1,4 +1,6 @@
-# Assignment 4
+# Multi-user Searchable Encryption: The SQL
+## CIS*4520 Course Project
+### Gavin and Daniel
 
 ## Technologies
 
