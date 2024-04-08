@@ -29,3 +29,5 @@ molecules.db
 /__pycache__/
 *.pyc
 eDatabase.db
+logs.txt
+*.db
