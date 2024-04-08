@@ -2,19 +2,22 @@
 
 # Constructs a dictionary W from database D
 def CreateDictionary(D, tableName: str):
+    """
+    Generates the dictionary of keywords of a given table.
+    To be used for BuildIndex
+    """
     table = D.retrieve_all(tableName)
     allAttributes = D.getAttributes()
     W = {}
-    # print('Total Attr:', allAttributes)
-    # print()
+
     for k, v in W.items():
-        print(k, v)
+        #print(k, v)
+        pass
     id=1
     for record in table:
         i=0
-        # print('cur record:', record)
         for attribute in allAttributes:
-            # print('cur attr:', attribute)
+            # #print('cur attr:', attribute)
             keyword = attribute + '=\'' + str(record[i]) + '\'' # create keyword from record
             if keyword in W:
                 W[keyword].append(id) # add to id list of keyword
@@ -22,11 +25,8 @@ def CreateDictionary(D, tableName: str):
                 W[keyword]=[id] # create new id list for keyword
             # Use .append
             i=i+1
-            # print(W)
-        # print()
+
         id=id+1
-    # print('W')
-    # print(W)
     return W, id-1
 
 # Retrieves keyword from id

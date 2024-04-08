@@ -2,11 +2,12 @@ from re import search
 
 from termcolor import colored
 import Database
-from users.BuildIndex import BuildIndexNewHash
+from users.BuildIndex import BuildIndex
 from users.CreateDictionary import CreateDictionary
 from Search import Search
 from EncryptedDatabase import EncryptedDatabase
 from cryptography.hazmat.primitives.ciphers import aead;
+from utils.CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce
 class DataHost:
     def __init__(self, database : EncryptedDatabase = None) -> None:
         self._masterKey = aead.AESSIV.generate_key(256)
@@ -17,7 +18,7 @@ class DataHost:
         pass
 
     def addReader(self, readerId, readerKey):
-        print(colored('DH', 'green'),'\t add reader [',readerId,']')
+        print(colored('DH', 'green'),'\t add reader [',colored(readerId, 'cyan'),']')
         self._readerKeys[readerId] = readerKey
         print(colored('DH', 'green'),'\t done add reader')
     
@@ -29,7 +30,7 @@ class DataHost:
     def encryptTable(self, database: Database, tableName, k, secretKey, realTableName):
         print(colored('DH', 'green'),'\t generate index for table')
         keywordList, n = CreateDictionary(database, realTableName)
-        I = BuildIndexNewHash(keywordList, n, K=k, Klen=256, secretKey=secretKey)
+        I = BuildIndex(keywordList, n, K=k, Klen=256, secretKey=secretKey)
         self._encryptedIndexes[tableName] = I
         print(colored('DH', 'green'),'\t done generate index')
 
@@ -39,7 +40,6 @@ class DataHost:
         Attributes will be in the form from the sql commands
         """
         print(colored('DH', 'green'),'\t register new table')
-        cipher = aead.AESSIV(self._masterKey)
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
 
         if(self._encryptedTableAttributes.get(tableName) is not None):
@@ -47,17 +47,16 @@ class DataHost:
         encryptedAttributes = []
         
         for attribute in attributes:
-            c = cipher.encrypt(bytes(attribute, 'utf-8'), []).hex()
+            c = AESSIVEncryptNonce(self._masterKey, attribute).hex()
             encryptedAttributes.append(c)
 
         self._encryptedTableAttributes[tableName] = encryptedAttributes
 
         self._database.createTable(tableName, encryptedAttributes)
-        print(colored('DH', 'green'),'\t done register new table [',tableName,'] with attributes',encryptedAttributes)
+        print(colored('DH', 'green'),'\t done register new table [',colored(tableName, 'yellow'),'] with attributes',encryptedAttributes)
 
     def addNewValuesToTable(self, tableName, values):
         print(colored('DH', 'green'),'\t add new values to table')
-        cipher = aead.AESSIV(self._masterKey)
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
 
         if(self._encryptedTableAttributes[tableName] is None):
@@ -66,7 +65,7 @@ class DataHost:
         recordId = self._database.getTableRecordLength(tableName) + 1
         encryptedValues = [recordId]
         for value in values:
-            encValue = cipher.encrypt(bytes(str(value), 'utf-8'), []).hex()
+            encValue = AESSIVEncryptNonce(self._masterKey,str(value),).hex()
             encryptedValues.append(encValue)
 
         self._database.insertIntoTable(tableName, self._encryptedTableAttributes[tableName], encryptedValues)
@@ -75,7 +74,6 @@ class DataHost:
 
     def search(self, t):
         print(colored('DH', 'green'),'\t start search')
-        cipher = aead.AESSIV(self._masterKey)
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
         tableIds = set(())
         if(len(t) == 0):
@@ -102,11 +100,11 @@ class DataHost:
                     print(colored('DH', 'green'),'\t decrypt',record)
                     unencryptedRecord = []
                     for val in relevantRecords:
-                        unencryptedRecord.append(cipher.decrypt(bytes.fromhex(val),[]).decode('utf-8'))
+                        unencryptedRecord.append(AESSIVDecryptNonce(self._masterKey, bytes.fromhex(val)).decode('utf-8'))
                     newVals.append(unencryptedRecord)
-                allRecords.append(newVals)
+                allRecords.extend(newVals)
                 tableIds.update(ids)
         
         print(colored('DH', 'green'),'\t done search [',ids,allRecords,']')
-        return ids, allRecords
+        return tableIds, allRecords
     

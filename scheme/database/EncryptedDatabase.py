@@ -4,6 +4,9 @@ import time
 
 # Class to support database operations
 class EncryptedDatabase:
+    """
+    A basic database wrapper for an sqlite database. Although it is encrypted it can support the plain data as well. 
+    """
     # Constructor
     def __init__(self, reset=False):
         if reset == True and os.path.exists('eDatabase.db'):
@@ -72,22 +75,3 @@ class EncryptedDatabase:
         self._logAction(f"SELECT * FROM _{tableName}", logTime)
 
         return len(entries)
-    
-    # This method checks if an entry already exists within a table
-    def check_entry(self, table, attribute, entry):
-        val = self.conn.execute("""SELECT EXISTS(SELECT 1 FROM %s WHERE %s.%s='%s')""" % (table, table, attribute, entry)).fetchall()
-        exists = int(val[0][0])
-        return exists
-    
-    # This method deletes an entry from a table
-    def delete_entry(self, table, attribute, entry):
-        self.conn.execute("DELETE from %s WHERE %s.%s='%s'" % (table, table, attribute, entry))
-        # Commit transaction
-        self.conn.commit()
-
-    def getAttributes(self):
-        cur = self.conn.execute("SELECT * FROM Molecules")
-        attr = list(map(lambda x: x[0], cur.description))
-        return attr
-    
-    

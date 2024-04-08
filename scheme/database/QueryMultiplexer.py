@@ -4,12 +4,12 @@ from DataHost import DataHost
 class QueryMutliplexer():
 
     def _auth(self, readerId):
-        print(colored('QM', 'green'),'\t checking if',readerId,'is authorized...')
+        print(colored('QM', 'green'),'\t checking if',colored(readerId,'cyan'),'is authorized...')
         authorizedWriters = []
         for writer in list(self._authorizations.keys()):
             if readerId in self._authorizations[writer]:
                 authorizedWriters.append(writer)
-                print(colored('QM', 'green'),'\t',writer ,' has authorized!',self._authorizations[writer])
+                print(colored('QM', 'green'),'\t',colored(writer, 'cyan') ,' has authorized!',self._authorizations[writer])
         if not authorizedWriters:
             print(colored('QM', 'green'),'\t not authorized!')
             pass
@@ -26,25 +26,25 @@ class QueryMutliplexer():
         """
         Add a given writer from their id and symmetric key
         """
-        print(colored('QM', 'green'),'\t add writer [',id,'] with secret key [',symmetricKey,']')
+        print(colored('QM', 'green'),'\t add writer [',colored(id, 'cyan'),'] with secret key [',symmetricKey,']')
         self._writers.append((id, symmetricKey))
         self._authorizations[id] = {}
         print(colored('QM', 'green'),'\t done add writer')
 
     def addReader(self, publicKey: Fr, id: str):
-        print(colored('QM', 'green'),'\t add reader [',id,'] with public key [',publicKey,']')
+        print(colored('QM', 'green'),'\t add reader [',colored(id, 'cyan'),'] with public key [',publicKey,']')
         self._readers.append((id, publicKey)) #prob need to add more authentication still
         print(colored('QM', 'green'),'\t done add reader')
     
     def delegate(self, auth, writerId, readerId):
-        print(colored('QM', 'green'),'\t',writerId,'authorizes',readerId, '[',auth,']')
+        print(colored('QM', 'green'),'\t',colored(writerId, ('cyan')),'authorizes',colored(readerId, 'cyan'), '[',auth,']')
         if writerId not in self._authorizations:
             return False
         self._authorizations[writerId][readerId] = auth # replace this with the actual value
         print(colored('QM', 'green'),'\t done delegate')
     
     def transform(self, trapdoor, readerId, dataHost : DataHost = None ):
-        print(colored('QM - GET', 'green'),'\t transform trapdoor', trapdoor,'for',readerId)
+        print(colored('QM - GET', 'green'),'\t transform trapdoor', trapdoor,'for',colored(readerId, 'cyan'))
         authR = self._auth(readerId=readerId)
         tPrimePrime = []
 
