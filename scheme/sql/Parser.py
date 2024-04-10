@@ -72,6 +72,7 @@ def getSelectKeywords(sql):
             # print(nextToken[1])
             # print("JALSDJFLKAJD")
         # print("\nstuff", token)
+    raise Exception()
 
 def parseCreateStatement(sqlStatement):
     """

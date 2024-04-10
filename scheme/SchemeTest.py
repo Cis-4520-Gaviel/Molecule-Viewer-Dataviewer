@@ -262,33 +262,41 @@ def runMainScheme():
 
     while(True):
         userInput = input("Initialization completed successfully. Enter the number of the test to run\n")
-        if(userInput == "0"):
-            break
-        if(userInput == "1"):
-            print('Generating trapdoors...')
-            results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader.id)
-            print('Completed trapdoor search!\n\n')
-        if(userInput == "2"):
+        try:
+            if(userInput == "0"):
+                break
+            if(userInput == "1"):
+                print('Generating trapdoors...')
+                results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader.id)
+                print('Completed trapdoor search!\n\n')
+            if(userInput == "2"):
 
-            print('Generating second trapdoors...')
-            results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';", reader.id)
-            print('Completed second trapdoor search!\n\n')
-        if(userInput == "3"):
+                print('Generating second trapdoors...')
+                results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';", reader.id)
+                print('Completed second trapdoor search!\n\n')
+            if(userInput == "3"):
 
-            print('Generating bad trapdoor...')
-            results = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
-            print('Completed generating bad trapdoor!\n\n')
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader2.id)
-            print('Completed bad trapdoor search!\n\n')
-        if(userInput == "4"):
-            print('Generating trapdoors...')
-            results = reader3.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader3.id)
-            print('Completed trapdoor search!\n\n')
+                print('Generating bad trapdoor...')
+                results = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
+                print('Completed generating bad trapdoor!\n\n')
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader2.id)
+                print('Completed bad trapdoor search!\n\n')
+            if(userInput == "4"):
+                print('Generating trapdoors...')
+                results = reader3.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader3.id)
+                print('Completed trapdoor search!\n\n')
+            if(userInput == "5"):
+                print("Enter an SQL Statement that Eric enters")
+                sqlStuff = input()
+                results = reader3.trapdoor(sqlStuff)
+                printResults(results, sqlStuff, reader3.id)
+                print('Completed trapdoor search!\n\n')
+        except Exception as error:
+            print(error)
     qm.printData()
-
 
 
 if __name__ == '__main__':
