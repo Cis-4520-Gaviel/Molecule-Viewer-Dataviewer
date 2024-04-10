@@ -8,6 +8,7 @@ from Search import Search
 from EncryptedDatabase import EncryptedDatabase
 from cryptography.hazmat.primitives.ciphers import aead;
 from utils.CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce
+from utils.Records import convertTupleToString
 class DataHost:
     def __init__(self, database : EncryptedDatabase = None) -> None:
         self._masterKey = aead.AESSIV.generate_key(256)
@@ -72,9 +73,10 @@ class DataHost:
         print(colored('DH', 'green'),'\t done add new values [',encryptedValues,']')
 
 
-    def search(self, t):
+    def search(self, t, readerId):
         print(colored('DH', 'green'),'\t start search')
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
+        r = self._readerKeys[readerId]
         tableIds = set(())
         if(len(t) == 0):
             print(colored('DH', 'green'),'\t search fail!')
@@ -97,11 +99,11 @@ class DataHost:
                 newVals = []
                 for record in records:
                     relevantRecords = record[1:]
-                    print(colored('DH', 'green'),'\t decrypt',record)
+                    print(colored('DH', 'green'),'\t decrypt',record, " - encrypt using " , colored(readerId, 'cyan'), "'s secret key")
                     unencryptedRecord = []
                     for val in relevantRecords:
                         unencryptedRecord.append(AESSIVDecryptNonce(self._masterKey, bytes.fromhex(val)).decode('utf-8'))
-                    newVals.append(unencryptedRecord)
+                    newVals.append(AESSIVEncryptNonce(r,convertTupleToString(unencryptedRecord)))
                 allRecords.extend(newVals)
                 tableIds.update(ids)
         

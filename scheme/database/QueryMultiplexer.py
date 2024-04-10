@@ -69,7 +69,7 @@ class QueryMutliplexer():
         if(dataHost is None):
             return tPrimePrime
         
-        ids, results = dataHost.search(tPrimePrime)
+        ids, results = dataHost.search(tPrimePrime, readerId=readerId)
         print(colored('QM - RECIEVE', 'green'),'\t recieved searched results:',results)
 
         return ids, results

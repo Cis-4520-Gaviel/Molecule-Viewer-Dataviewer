@@ -71,18 +71,19 @@ activate QM
 QM->QM: transform queries
 activate QM #DarkGrey
 QM-->DH: Search(t'_{r,s})
+note left DH: Send Search message\nfor every r in auth(w)
 activate DH
-DH -> DH : Search (I, trapdoor)
-
-
+DH -> DH : Search (I, t'_r,s)
 
 DH->SQLServer : retrieveRecords (tableName, recordIDs)
 activate SQLServer
-SQLServer-->DH:Encrypted results
+SQLServer-->DH:Encrypted results, p
+DH->DH: p' = e(k_r, p)
 deactivate SQLServer
 DH-->QM:p'_{r,s}
 deactivate DH
 deactivate QM
 
 QM->Reader:p_{r_s}
+Reader->Reader:d(k_r, p_{r,s})
 @enduml

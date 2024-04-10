@@ -10,6 +10,8 @@ from KeyGen import KeyGen
 from database.Database import Database
 from sql.Parser import parseInsertStatement
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
+from utils.CryptoUtils import AESSIVDecryptNonce
+from utils.Records import convertStringToTuple
 
 class User(ABC):
     @abstractmethod
@@ -128,4 +130,10 @@ class Reader(User):
         print(colored('Reader', 'green'),'\t generate trapdoor for [',colored(sqlStatement, 'yellow'),'] using priv key')
         t = generateTrapdoor(sqlStatement, self._privateKey) 
         print(colored('Reader - POST', 'green'),'\t done generate trapdoor, sending to QM: ', t)
-        return self.QM.transform(t, self.id, self.DH)
+        ids, trapdoors = self.QM.transform(t, self.id, self.DH)
+        decryptedTrapdoors = []
+        for t in trapdoors:
+            plaintext = AESSIVDecryptNonce(self._kR, t).decode('utf-8')
+            decryptedTrapdoors.append(convertStringToTuple(plaintext))
+        
+        return ids, decryptedTrapdoors
