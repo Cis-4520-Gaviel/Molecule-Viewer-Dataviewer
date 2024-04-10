@@ -7,5 +7,5 @@ def KeyGen(Klen):
     Kpi = os.urandom(Klen//8)
     Kphi = AESSIV.generate_key(Klen)
 
-    return Kpsi, Kpi, Kphi
+    return Kpsi, None, None
 

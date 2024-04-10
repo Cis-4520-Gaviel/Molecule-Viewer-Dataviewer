@@ -1,9 +1,8 @@
-from re import search
 
 from termcolor import colored
 import Database
-from users.BuildIndex import BuildIndex
-from users.CreateDictionary import CreateDictionary
+from database.BuildIndex import BuildIndex
+from CreateDictionary import CreateDictionary
 from Search import Search
 from EncryptedDatabase import EncryptedDatabase
 from cryptography.hazmat.primitives.ciphers import aead;

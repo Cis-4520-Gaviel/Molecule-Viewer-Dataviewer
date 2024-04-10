@@ -1,4 +1,4 @@
-from pymcl import pairing, Fr, g1, G1
+from pymcl import pairing, Fr
 from termcolor import colored
 from DataHost import DataHost
 class QueryMutliplexer():

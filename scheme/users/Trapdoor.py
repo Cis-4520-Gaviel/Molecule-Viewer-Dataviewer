@@ -1,6 +1,5 @@
-import sqlparse
-from utils.CryptoUtils import AESSIVEncryptNonce, phiFunction
-from pymcl import g1, pairing
+from utils.CryptoUtils import phiFunction
+from pymcl import g1
 import os
 from sql.Parser import getSelectKeywords
 

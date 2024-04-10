@@ -1,4 +1,4 @@
-# Assignment 4
+# Gaviel
 
 ## Technologies
 
@@ -18,11 +18,12 @@ Built on Ubuntu 22.04.3 LTS
 
 - [cryptography](https://pypi.org/project/cryptography/)
 - [pymcl](https://github.com/Jemtaly/pymcl)
-- [otc](https://pypi.org/project/otc/)
 
 ### Installing pymcl
 
-Configure
+Clone the [pymcl repository](https://github.com/Jemtaly/pymcl)
+
+If you are using WSL, you will need to run this command to fix ldconfig.
 
 ```bash
 cd /usr/lib/wsl/lib

@@ -1,4 +1,3 @@
-import os
 from pymcl import Fr, g1, g2, pairing
 from abc import ABC, abstractmethod
 
@@ -6,9 +5,8 @@ from termcolor import colored
 from users.Trapdoor import generateTrapdoor
 from database.QueryMultiplexer import QueryMutliplexer
 from database.DataHost import DataHost
-from KeyGen import KeyGen
+from utils.KeyGen import KeyGen
 from database.Database import Database
-from sql.Parser import parseInsertStatement
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
 from utils.CryptoUtils import AESSIVDecryptNonce
 from utils.Records import convertStringToTuple

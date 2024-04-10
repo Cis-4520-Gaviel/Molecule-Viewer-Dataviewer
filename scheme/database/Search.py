@@ -1,5 +1,3 @@
-from itertools import cycle
-import os
 from utils.CryptoUtils import AESSIVDecryptNonce
 from utils.CryptoUtils import xor
 from utils.Node import Node
