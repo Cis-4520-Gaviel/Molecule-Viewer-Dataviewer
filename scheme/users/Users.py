@@ -130,8 +130,11 @@ class Reader(User):
         print(colored('Reader', 'green'),'\t generate trapdoor for [',colored(sqlStatement, 'yellow'),'] using priv key')
         t = generateTrapdoor(sqlStatement, self._privateKey) 
         print(colored('Reader - POST', 'green'),'\t done generate trapdoor, sending to QM: ', t)
+
         ids, trapdoors = self.QM.transform(t, self.id, self.DH)
         decryptedTrapdoors = []
+
+        #decrypting the recieved records
         for t in trapdoors:
             plaintext = AESSIVDecryptNonce(self._kR, t).decode('utf-8')
             decryptedTrapdoors.append(convertStringToTuple(plaintext))
