@@ -1,9 +1,11 @@
 from database.Database import *
-from KeyGen import *
-from users.CreateDictionary import *
-from users.BuildIndex import *
+from utils.KeyGen import *
+from database.CreateDictionary import *
+from database.BuildIndex import *
 from users.Trapdoor import *
 from database.Search import *
+from pymcl import Fr
+
 
 # Create test database
 D = Database(reset=True)
@@ -22,7 +24,9 @@ print('Dataset:', D.retrieve_all('Molecules'))
 # Create keys
 Klen = 256
 K = KeyGen(Klen) # K = (Kpsi, Kpi, Kphi)
+sK = Fr.random()
 
+privKey = Fr.random()
 # Test CreateDictionary
 print('Testing CreateDictionary...')
 W, n = CreateDictionary(D, 'Molecules')
@@ -36,7 +40,7 @@ print('Completed CreateDictionary!\n\n')
 
 # Test BuildIndex
 print('Testing BuildIndex...')
-I = BuildIndex(W,n,K,Klen)
+I = BuildIndex(W,n,K,Klen, sK)
 # print(I)
 # (A,T) = I
 # print('A:')
@@ -53,7 +57,7 @@ print('Testing Trapdoor...')
 # sql = """SELECT * FROM Molecules WHERE NAME='Water';"""
 # sql = """SELECT * FROM Molecules WHERE NAME='Snow';"""
 sql = """SELECT * FROM Molecules WHERE BOND_NO='1';"""
-minecraftdoor = generateTrapdoor(sql,K)
+minecraftdoor = generateTrapdoor(sql,privKey)
 print(minecraftdoor)
 print('Completed Trapdoor!\n\n')
 

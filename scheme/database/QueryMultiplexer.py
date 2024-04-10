@@ -1,6 +1,6 @@
 from pymcl import pairing, Fr
 from termcolor import colored
-from DataHost import DataHost
+from database.DataHost import DataHost
 class QueryMutliplexer():
 
     def _auth(self, readerId):

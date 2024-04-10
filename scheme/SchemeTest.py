@@ -4,10 +4,11 @@ from users.Users import Writer, Reader
 from pymcl import pairing, g1,g2
 from database.QueryMultiplexer import QueryMutliplexer
 from database.DataHost import DataHost
-from EncryptedDatabase import EncryptedDatabase
+from database.EncryptedDatabase import EncryptedDatabase
 import random
 import string
 import time
+
 def printResults(results, query, readerId):
     ids, records = results
     print()
@@ -197,7 +198,7 @@ def testScheme3():
     
     # logAction(records, "encryption time, 100 long molecule name")
 
-def testScheme(testCase = "case1"):
+def runMainScheme():
     # init
     
     # init QM and DH
@@ -291,7 +292,6 @@ def testScheme(testCase = "case1"):
 
 
 if __name__ == '__main__':
-    # main()
-    testScheme()
+    runMainScheme()
 
     

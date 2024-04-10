@@ -1,10 +1,9 @@
-
 from termcolor import colored
-import Database
+from database.Database import Database
 from database.BuildIndex import BuildIndex
-from CreateDictionary import CreateDictionary
-from Search import Search
-from EncryptedDatabase import EncryptedDatabase
+from database.CreateDictionary import CreateDictionary
+from database.Search import Search
+from database.EncryptedDatabase import EncryptedDatabase
 from cryptography.hazmat.primitives.ciphers import aead;
 from utils.CryptoUtils import AESSIVDecryptNonce, AESSIVEncryptNonce
 from utils.Records import convertTupleToString

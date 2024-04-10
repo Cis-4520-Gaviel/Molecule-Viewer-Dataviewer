@@ -3,16 +3,17 @@ from pymcl import g1
 import os
 from sql.Parser import getSelectKeywords
 
-def generateTrapdoor(sql, privKey): #using new hash
+def generateTrapdoor(sql, privKey, tableName = 'Molecules'): #using new hash
     """
     generates an array of trapdoors from a select sql statement containing one or more queries
+    tableName defaults to "Molecules" for old code, which could not be refactored in time.
     """
     Kphi = b''
     # (Kpsi, Kpi, Kphi) = K # retrieve keys
     print('input SQL:', sql)
 
-    keywords = getSelectKeywords(sql)
-    tableName = 'Molecules'
+    keywords = getSelectKeywords(sql) # TODO retrieve tablename from getSelectKeywords and use here
+
     encTableName = g1.hash(bytes(tableName, 'utf-8')) * privKey
 
     trapdoors = []
