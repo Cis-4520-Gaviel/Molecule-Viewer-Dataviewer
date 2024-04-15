@@ -199,7 +199,6 @@ def testScheme3():
     # logAction(records, "encryption time, 100 long molecule name")
 
 def runMainScheme():
-    # init
     
     # init QM and DH
     qm = QueryMutliplexer(b'123')
@@ -216,7 +215,7 @@ def runMainScheme():
 
     reader3 = Reader(qm, dh, "Eric")
     print('Completed initializing users!\n\n')
-    input()
+    input("Press enter to continue to next step")
 
     # table creation
     print('Adding records to db...')
@@ -228,13 +227,13 @@ def runMainScheme():
     writer.updateDatabase(['Joel', 69, 12])
     writer.updateDatabase(['Myron', 100, 11])
     writer.updateDatabase(['Me', 12, 33])
-    for i in range(100):
+    for i in range(30):
         molName = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
         atomCount = random.randint(0,1000)
         bondCount = random.randint(0,30)
         writer.updateDatabase([molName, atomCount, bondCount ])
     print('Completed adding records!\n\n')
-    input()
+    input("Press enter to continue to next step")
 
     # writer encrypt table test
     print('Encrypting table...')
@@ -249,7 +248,7 @@ def runMainScheme():
     # delta = endTime - curTime
     # print(f"Time difference is {delta} seconds")
     print('Completed encrypting table!\n',delta,' Seconds elapsed to encrypt Alices Index\n')
-    input()
+    input("Press enter to continue to next step")
     
     # auth delegation
     print('Authorizing readers...')
@@ -257,13 +256,21 @@ def runMainScheme():
     writer.delegate(reader3.getPublicKey(), reader3.id)
     writer2.delegate(reader3.getPublicKey(), reader3.id)
     print('Completed authorizing readers!\n\n')
+    print("Press enter to continue to next step")
 
     # search query
 
     while(True):
-        userInput = input("Initialization completed successfully. Enter the number of the test to run\n")
+        print("""Enter test number to run:
+1\tBob searches using 'SELECT * FROM Molecules WHERE BOND_NO='1';'
+2\tBob searches using 'SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';'
+3\tMallory searches using 'SELECT * FROM Molecules WHERE BOND_NO='1';'
+4\tEric searches using 'SELECT * FROM Molecules WHERE BOND_NO='1';'
+5\tEric searches using a custom SQL statement
+exit\tClose Program""")
+        userInput = input("Enter the number of the test to run\n")
         try:
-            if(userInput == "0"):
+            if(userInput == "exit"):
                 break
             if(userInput == "1"):
                 print('Generating trapdoors...')

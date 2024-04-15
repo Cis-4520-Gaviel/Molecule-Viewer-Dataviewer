@@ -33,7 +33,7 @@ class DataHost:
         self._encryptedIndexes[tableName] = I
         print(colored('DH', 'green'),'\t done generate index')
 
-    def registerNewTable(self, tableName: str, attributes: list):
+    def Register(self, tableName: str, attributes: list):
         """
         Send the value of the normal string
         Attributes will be in the form from the sql commands
@@ -54,7 +54,7 @@ class DataHost:
         self._database.createTable(tableName, encryptedAttributes)
         print(colored('DH', 'green'),'\t done register new table [',colored(tableName, 'yellow'),'] with attributes',encryptedAttributes)
 
-    def addNewValuesToTable(self, tableName, values):
+    def UploadValues(self, tableName, values):
         print(colored('DH', 'green'),'\t add new values to table')
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
 

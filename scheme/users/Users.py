@@ -49,7 +49,7 @@ class Writer(User):
         print(colored('Writer', 'green'),'\t create new table [',colored(tableName, 'yellow'),'] with attributes',attributes)
 
         encTableName = pairing(g1.hash(bytes(tableName, 'utf-8')), g2 * self._secretKey)
-        self.DH.registerNewTable(encTableName.serialize().hex(), attributes)
+        self.DH.Register(encTableName.serialize().hex(), attributes)
 
         print(colored('Writer', 'green'),'\t done create table')
 
@@ -58,7 +58,7 @@ class Writer(User):
 
         self._database.add_molecule(*values)
         encTableName = pairing(g1.hash(bytes(tableName, 'utf-8')), g2 * self._secretKey)
-        self.DH.addNewValuesToTable(encTableName.serialize().hex(), values)
+        self.DH.UploadValues(encTableName.serialize().hex(), values)
 
         if(rebuildIndex == True):
             self.encrypt('Molecules')
