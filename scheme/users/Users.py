@@ -1,4 +1,3 @@
-import os
 from pymcl import Fr, g1, g2, pairing
 from abc import ABC, abstractmethod
 
@@ -6,10 +5,11 @@ from termcolor import colored
 from users.Trapdoor import generateTrapdoor
 from database.QueryMultiplexer import QueryMutliplexer
 from database.DataHost import DataHost
-from KeyGen import KeyGen
+from utils.KeyGen import KeyGen
 from database.Database import Database
-from sql.Parser import parseInsertStatement
 from cryptography.hazmat.primitives.ciphers.aead import AESSIV
+from utils.CryptoUtils import AESSIVDecryptNonce
+from utils.Records import convertStringToTuple
 
 class User(ABC):
     @abstractmethod
@@ -37,7 +37,7 @@ class Writer(User):
         self._secretKey = self._setup()
         print(colored('Writer', 'green'),'\t gen secret key [',self._secretKey,']')
 
-        self._database = Database(id,True)
+        self._database = Database(id,True) # creates a molecule database associated with this reader
         self._database.create_tables()
         super().__init__(queryMultiplexer, dataHost, id)
 
@@ -49,7 +49,7 @@ class Writer(User):
         print(colored('Writer', 'green'),'\t create new table [',colored(tableName, 'yellow'),'] with attributes',attributes)
 
         encTableName = pairing(g1.hash(bytes(tableName, 'utf-8')), g2 * self._secretKey)
-        self.DH.registerNewTable(encTableName.serialize().hex(), attributes)
+        self.DH.Register(encTableName.serialize().hex(), attributes)
 
         print(colored('Writer', 'green'),'\t done create table')
 
@@ -58,7 +58,7 @@ class Writer(User):
 
         self._database.add_molecule(*values)
         encTableName = pairing(g1.hash(bytes(tableName, 'utf-8')), g2 * self._secretKey)
-        self.DH.addNewValuesToTable(encTableName.serialize().hex(), values)
+        self.DH.UploadValues(encTableName.serialize().hex(), values)
 
         if(rebuildIndex == True):
             self.encrypt('Molecules')
@@ -128,4 +128,13 @@ class Reader(User):
         print(colored('Reader', 'green'),'\t generate trapdoor for [',colored(sqlStatement, 'yellow'),'] using priv key')
         t = generateTrapdoor(sqlStatement, self._privateKey) 
         print(colored('Reader - POST', 'green'),'\t done generate trapdoor, sending to QM: ', t)
-        return self.QM.transform(t, self.id, self.DH)
+
+        ids, trapdoors = self.QM.transform(t, self.id, self.DH)
+        decryptedTrapdoors = []
+
+        #decrypting the recieved records
+        for t in trapdoors:
+            plaintext = AESSIVDecryptNonce(self._kR, t).decode('utf-8')
+            decryptedTrapdoors.append(convertStringToTuple(plaintext))
+        
+        return ids, decryptedTrapdoors

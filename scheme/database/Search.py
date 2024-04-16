@@ -1,11 +1,12 @@
-from itertools import cycle
-import os
 from utils.CryptoUtils import AESSIVDecryptNonce
 from utils.CryptoUtils import xor
 from utils.Node import Node
 # Search over the search index I using the search token generated with
 # algorithm Trapdoor
 def Search(I, minecraftdoor):
+    """
+    Performs a search upon an encrypted index. minecraftdoor = trapdoor
+    """
 
     (A, T) = I # parse index into A array and T lookup table
     (pos,Kw) = minecraftdoor # parse trapdoor
@@ -35,8 +36,10 @@ def Search(I, minecraftdoor):
         
         node = AESSIVDecryptNonce(nextKey, N)
         curNode = Node.parseString(str(node.decode()))
+
         results.append(curNode.recordID)
         print('hit! [',curNode.recordID,'] at node address [',nextAddr,']')
+        
         nextAddr = curNode.addressNext
         nextKey = curNode.kNext
 

@@ -1,23 +1,26 @@
-import sqlparse
-from utils.CryptoUtils import AESSIVEncryptNonce, phiFunction
-from pymcl import g1, pairing
+from utils.CryptoUtils import phiFunction
+from pymcl import g1
 import os
 from sql.Parser import getSelectKeywords
 
-def generateTrapdoor(sql, privKey): #using new hash
+def generateTrapdoor(sql, privKey, tableName = 'Molecules'): #using new hash
     """
     generates an array of trapdoors from a select sql statement containing one or more queries
+    tableName defaults to "Molecules" for old code, which could not be refactored in time.
     """
     Kphi = b''
     # (Kpsi, Kpi, Kphi) = K # retrieve keys
     print('input SQL:', sql)
-
-    keywords = getSelectKeywords(sql)
-    tableName = 'Molecules'
+    try:
+        keywords = getSelectKeywords(sql) # TODO retrieve tablename from getSelectKeywords and use here
+    except:
+         print("Invalid SQL Statement")
+         raise Exception()
+    
     encTableName = g1.hash(bytes(tableName, 'utf-8')) * privKey
 
     trapdoors = []
-    for keyword in keywords:
+    for keyword in keywords: #created a new trapdoor for each keyword condition found
         print('extract keyword:', keyword)
         posHash = g1.hash(bytes(keyword, 'utf-8'))
         pos = posHash * privKey

@@ -6,9 +6,9 @@ class Database:
 
     # Constructor
     def __init__(self, id = "molecules",reset=False):
-        if reset == True and os.path.exists(f'{id}.db'):
-            os.remove(f'{id}.db')
-        self.conn = sqlite3.connect(f'{id}.db')
+        if reset == True and os.path.exists(f'data/{id}.db'):
+            os.remove(f'data/{id}.db')
+        self.conn = sqlite3.connect(f'data/{id}.db')
 
     # This method creates tables
     def create_tables(self):

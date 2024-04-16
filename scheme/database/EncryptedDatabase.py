@@ -9,11 +9,11 @@ class EncryptedDatabase:
     """
     # Constructor
     def __init__(self, reset=False):
-        if reset == True and os.path.exists('eDatabase.db'):
-            os.remove('eDatabase.db')
-        self.conn = sqlite3.connect('eDatabase.db')
+        if reset == True and os.path.exists('data/eDatabase.db'):
+            os.remove('data/eDatabase.db')
+        self.conn = sqlite3.connect('data/eDatabase.db')
     def _logAction(self, sqlAction, loggedTime):
-        f = open("logs.txt", "a")
+        f = open("data/queriesLogged.txt", "a")
         f.write("[" + time.ctime(loggedTime) +"]: " + sqlAction)
         f.write("\n")
         f.close()
@@ -37,6 +37,9 @@ class EncryptedDatabase:
         self._logAction(sqlCommand, logTime)
 
     def insertIntoTable(self, name, attributes, values):
+        """
+        A simple method to insert whatever values into a given table
+        """
         sqlAttributes = "( recordID"
         for attribute in attributes:
             sqlAttributes = sqlAttributes + f", _{attribute}"

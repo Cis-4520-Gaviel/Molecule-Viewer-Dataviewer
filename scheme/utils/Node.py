@@ -1,7 +1,7 @@
 class Node:
     def parseString(unencryptedString):
         args = unencryptedString.split(" ")
-        # print(args)
+        # #print(args)
         if (len(args) != 3):
             raise Exception("bad")
         if(args[2] == "None"):

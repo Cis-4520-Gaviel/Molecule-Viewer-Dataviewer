@@ -4,10 +4,11 @@ from users.Users import Writer, Reader
 from pymcl import pairing, g1,g2
 from database.QueryMultiplexer import QueryMutliplexer
 from database.DataHost import DataHost
-from EncryptedDatabase import EncryptedDatabase
+from database.EncryptedDatabase import EncryptedDatabase
 import random
 import string
 import time
+
 def printResults(results, query, readerId):
     ids, records = results
     print()
@@ -197,8 +198,7 @@ def testScheme3():
     
     # logAction(records, "encryption time, 100 long molecule name")
 
-def testScheme(testCase = "case1"):
-    # init
+def runMainScheme():
     
     # init QM and DH
     qm = QueryMutliplexer(b'123')
@@ -215,7 +215,7 @@ def testScheme(testCase = "case1"):
 
     reader3 = Reader(qm, dh, "Eric")
     print('Completed initializing users!\n\n')
-    input()
+    input("Press enter to continue to next step")
 
     # table creation
     print('Adding records to db...')
@@ -227,13 +227,13 @@ def testScheme(testCase = "case1"):
     writer.updateDatabase(['Joel', 69, 12])
     writer.updateDatabase(['Myron', 100, 11])
     writer.updateDatabase(['Me', 12, 33])
-    for i in range(100):
+    for i in range(30):
         molName = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
         atomCount = random.randint(0,1000)
         bondCount = random.randint(0,30)
         writer.updateDatabase([molName, atomCount, bondCount ])
     print('Completed adding records!\n\n')
-    input()
+    input("Press enter to continue to next step")
 
     # writer encrypt table test
     print('Encrypting table...')
@@ -248,7 +248,7 @@ def testScheme(testCase = "case1"):
     # delta = endTime - curTime
     # print(f"Time difference is {delta} seconds")
     print('Completed encrypting table!\n',delta,' Seconds elapsed to encrypt Alices Index\n')
-    input()
+    input("Press enter to continue to next step")
     
     # auth delegation
     print('Authorizing readers...')
@@ -256,42 +256,57 @@ def testScheme(testCase = "case1"):
     writer.delegate(reader3.getPublicKey(), reader3.id)
     writer2.delegate(reader3.getPublicKey(), reader3.id)
     print('Completed authorizing readers!\n\n')
+    print("Press enter to continue to next step")
 
     # search query
 
     while(True):
-        userInput = input("Initialization completed successfully. Enter the number of the test to run\n")
-        if(userInput == "0"):
-            break
-        if(userInput == "1"):
-            print('Generating trapdoors...')
-            results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader.id)
-            print('Completed trapdoor search!\n\n')
-        if(userInput == "2"):
+        print("""Enter test number to run:
+1\tBob searches using 'SELECT * FROM Molecules WHERE BOND_NO='1';'
+2\tBob searches using 'SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';'
+3\tMallory searches using 'SELECT * FROM Molecules WHERE BOND_NO='1';'
+4\tEric searches using 'SELECT * FROM Molecules WHERE BOND_NO='1';'
+5\tEric searches using a custom SQL statement
+exit\tClose Program""")
+        userInput = input("Enter the number of the test to run\n")
+        try:
+            if(userInput == "exit"):
+                break
+            if(userInput == "1"):
+                print('Generating trapdoors...')
+                results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader.id)
+                print('Completed trapdoor search!\n\n')
+            if(userInput == "2"):
 
-            print('Generating second trapdoors...')
-            results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';", reader.id)
-            print('Completed second trapdoor search!\n\n')
-        if(userInput == "3"):
+                print('Generating second trapdoors...')
+                results = reader.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';")
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1' OR NAME='Earth';", reader.id)
+                print('Completed second trapdoor search!\n\n')
+            if(userInput == "3"):
 
-            print('Generating bad trapdoor...')
-            results = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
-            print('Completed generating bad trapdoor!\n\n')
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader2.id)
-            print('Completed bad trapdoor search!\n\n')
-        if(userInput == "4"):
-            print('Generating trapdoors...')
-            results = reader3.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
-            printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader3.id)
-            print('Completed trapdoor search!\n\n')
+                print('Generating bad trapdoor...')
+                results = reader2.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
+                print('Completed generating bad trapdoor!\n\n')
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader2.id)
+                print('Completed bad trapdoor search!\n\n')
+            if(userInput == "4"):
+                print('Generating trapdoors...')
+                results = reader3.trapdoor("SELECT * FROM Molecules WHERE BOND_NO='1';")
+                printResults(results, "SELECT * FROM Molecules WHERE BOND_NO='1';", reader3.id)
+                print('Completed trapdoor search!\n\n')
+            if(userInput == "5"):
+                print("Enter an SQL Statement that Eric enters")
+                sqlStuff = input()
+                results = reader3.trapdoor(sqlStuff)
+                printResults(results, sqlStuff, reader3.id)
+                print('Completed trapdoor search!\n\n')
+        except Exception as error:
+            print(error)
     qm.printData()
 
 
-
 if __name__ == '__main__':
-    # main()
-    testScheme()
+    runMainScheme()
 
     
