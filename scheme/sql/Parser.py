@@ -38,16 +38,11 @@ def getNonWhitespaceTokens(tokens):
             arr.append(tok)
     return arr
 
-
 def getSelectKeywords(sql):
     """
     This basically extracts the search keywords out of an sql statement. 
     DO NOT supply statements which do not contain statements. There is no error handling currently
     """
-
-    # print(sql)
-    output = sqlparse.format(sql, reindent=True)
-    # print(output)
     tokens = sqlparse.parse(sql)
     # print('Tokens:',tokens[0].tokens)
     for token in tokens[0].tokens:
@@ -63,31 +58,14 @@ def getSelectKeywords(sql):
                     temp += str(curToken)
                         
                 i = i + 1
-            # print(token.token_next(1)[1])
-            # print("output: ",temp)
-            # print("comparisons:", temp.split("AND"))
             return temp.split("OR")
-            # nextToken = token.token_next(1)
-            # print('Occurrances',nextToken)
-            # print(nextToken[1])
-            # print("JALSDJFLKAJD")
-        # print("\nstuff", token)
     raise Exception()
 
 def parseCreateStatement(sqlStatement):
     """
     Takes in a simple CREATE TABLE sql statement and returns the table name, as well as the attributes.
     """
-    # print(sqlStatement)
-    sections = sqlparse.format(sqlStatement, reindent=True, keyword_case='upper')
-    # for thing in sections:
-    #     print(thing)
-    # print(sections)
     tokens = sqlparse.parse(sqlStatement)
-    # print(tokens[0])
-    # for token in tokens[0]:
-    #     print(token)
-    # print(tokens[0].tokens)
     token = tokens[0]
     i = 1
     stage = 1
@@ -136,16 +114,7 @@ def parseInsertStatement(sqlStatement):
     """
     Takes in a simple INSERT INTO sql statement and returns the table name, as well as the values inserted.
     """
-    # print(sqlStatement)
-    sections = sqlparse.format(sqlStatement, reindent=True, keyword_case='upper')
-    # for thing in sections:
-    #     print(thing)
-    # print(sections)
     tokens = sqlparse.parse(sqlStatement)
-    # print(tokens[0])
-    # for token in tokens[0]:
-    #     print(token)
-    # print(tokens[0].tokens)
     token = tokens[0]
     i = 1
     stage = 1

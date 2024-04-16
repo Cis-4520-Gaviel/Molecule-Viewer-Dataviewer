@@ -22,11 +22,18 @@ class DataHost:
         print(colored('DH', 'green'),'\t done add reader')
     
     def uploadIndex(self, index, tableName: str): # replace this with more secure
+        """
+        Allows an encrypted index to be set for a given encrypted table name
+        """
         print(colored('DH', 'green'),'\t upload index')
         self._encryptedIndexes[tableName] = index
         print(colored('DH', 'green'),'\t done upload index')
 
     def encryptTable(self, database: Database, tableName, k, secretKey, realTableName):
+        """
+        given a database instance, generates an index for it using the given keys. Will store
+        the database within this DataHost instance.
+        """
         print(colored('DH', 'green'),'\t generate index for table')
         keywordList, n = CreateDictionary(database, realTableName)
         I = BuildIndex(keywordList, n, K=k, Klen=256, secretKey=secretKey)
@@ -55,6 +62,10 @@ class DataHost:
         print(colored('DH', 'green'),'\t done register new table [',colored(tableName, 'yellow'),'] with attributes',encryptedAttributes)
 
     def UploadValues(self, tableName, values):
+        """
+        Allows adding/uploading new records to a given table. The table name must
+        already be incrypted.
+        """
         print(colored('DH', 'green'),'\t add new values to table')
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
 
@@ -72,6 +83,9 @@ class DataHost:
 
 
     def search(self, t, readerId):
+        """
+        The search method. Recieves an array of trapdoor lists, one per writer authorized.
+        """
         print(colored('DH', 'green'),'\t start search')
         # encTableName = cipher.encrypt(bytes(tableName, 'utf-8'),[]).hex()
         r = self._readerKeys[readerId]
@@ -80,9 +94,15 @@ class DataHost:
             print(colored('DH', 'green'),'\t search fail!')
             return tableIds, []
         allRecords = []
+
+        #each iteration all belongs to the same table name, which belongs
+        # to a one writer
         for tPrime in t:
             ids = set(())
-            (temp, temp1, tableName) = tPrime[0]
+            # The encrypted table name will be the same between all trapdoors here
+            (temp, temp1, tableName) = tPrime[0] #get the table name here
+
+            #performing the keyword serach for all trapdoors within tprime
             for trapdoor in tPrime:
                 (pos, k, tName) = trapdoor
                 print(colored('DH', 'green'),'\t get pos and sql table name from trapdoor')
@@ -92,6 +112,8 @@ class DataHost:
                 ids.update(results)
                 print()
             records = []
+
+            # processing the results if there are any found.
             if(len(ids) > 0):
                 records = self._database.retrieveRecords(tableName.serialize().hex(), list(ids))
                 newVals = []
@@ -99,6 +121,8 @@ class DataHost:
                     relevantRecords = record[1:]
                     print(colored('DH', 'green'),'\t decrypt',record, " - encrypt using " , colored(readerId, 'cyan'), "'s secret key")
                     unencryptedRecord = []
+
+                    #encrypt the records wtih k[r] before returning
                     for val in relevantRecords:
                         unencryptedRecord.append(AESSIVDecryptNonce(self._masterKey, bytes.fromhex(val)).decode('utf-8'))
                     newVals.append(AESSIVEncryptNonce(r,convertTupleToString(unencryptedRecord)))

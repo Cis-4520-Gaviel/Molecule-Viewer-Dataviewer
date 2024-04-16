@@ -37,6 +37,9 @@ class EncryptedDatabase:
         self._logAction(sqlCommand, logTime)
 
     def insertIntoTable(self, name, attributes, values):
+        """
+        A simple method to insert whatever values into a given table
+        """
         sqlAttributes = "( recordID"
         for attribute in attributes:
             sqlAttributes = sqlAttributes + f", _{attribute}"

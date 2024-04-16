@@ -12,7 +12,6 @@ def generateTrapdoor(sql, privKey, tableName = 'Molecules'): #using new hash
     # (Kpsi, Kpi, Kphi) = K # retrieve keys
     print('input SQL:', sql)
     try:
-         
         keywords = getSelectKeywords(sql) # TODO retrieve tablename from getSelectKeywords and use here
     except:
          print("Invalid SQL Statement")
@@ -21,7 +20,7 @@ def generateTrapdoor(sql, privKey, tableName = 'Molecules'): #using new hash
     encTableName = g1.hash(bytes(tableName, 'utf-8')) * privKey
 
     trapdoors = []
-    for keyword in keywords:
+    for keyword in keywords: #created a new trapdoor for each keyword condition found
         print('extract keyword:', keyword)
         posHash = g1.hash(bytes(keyword, 'utf-8'))
         pos = posHash * privKey

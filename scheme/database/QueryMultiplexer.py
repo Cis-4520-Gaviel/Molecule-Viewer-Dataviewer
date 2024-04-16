@@ -4,6 +4,9 @@ from database.DataHost import DataHost
 class QueryMutliplexer():
 
     def _auth(self, readerId):
+        """
+        Gets the writers that have authorized the given readerId
+        """
         print(colored('QM', 'green'),'\t checking if',colored(readerId,'cyan'),'is authorized...')
         authorizedWriters = []
         for writer in list(self._authorizations.keys()):
@@ -32,25 +35,36 @@ class QueryMutliplexer():
         print(colored('QM', 'green'),'\t done add writer')
 
     def addReader(self, publicKey: Fr, id: str):
+        """
+        Adds a given reader from their id and public key
+        """
         print(colored('QM', 'green'),'\t add reader [',colored(id, 'cyan'),'] with public key [',publicKey,']')
         self._readers.append((id, publicKey)) #prob need to add more authentication still
         print(colored('QM', 'green'),'\t done add reader')
     
     def delegate(self, auth, writerId, readerId):
+        """
+        Sets the authorization from a writer for a reader
+        """
         print(colored('QM', 'green'),'\t',colored(writerId, ('cyan')),'authorizes',colored(readerId, 'cyan'), '[',auth,']')
         if writerId not in self._authorizations:
             return False
         self._authorizations[writerId][readerId] = auth # replace this with the actual value
         print(colored('QM', 'green'),'\t done delegate')
-    
+
     def transform(self, trapdoor, readerId, dataHost : DataHost = None ):
+        """
+        Transforms recieved trapdoor into transformed trapdoors based on the authorizations
+        the reader has been given from each writer
+        """
         print(colored('QM - GET', 'green'),'\t transform trapdoor', trapdoor,'for',colored(readerId, 'cyan'))
         authR = self._auth(readerId=readerId)
         tPrimePrime = []
 
+        # handling each writer in a loop
         for w in authR:
             tPrime = []
-            for t in trapdoor:
+            for t in trapdoor:  # handling how many trapdoors were created from the select statement
                 (pos, kW, tableName) = t
                 # #print(tableName)
                 # #print(pos.__class__)

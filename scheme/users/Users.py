@@ -37,7 +37,7 @@ class Writer(User):
         self._secretKey = self._setup()
         print(colored('Writer', 'green'),'\t gen secret key [',self._secretKey,']')
 
-        self._database = Database(id,True)
+        self._database = Database(id,True) # creates a molecule database associated with this reader
         self._database.create_tables()
         super().__init__(queryMultiplexer, dataHost, id)
 
