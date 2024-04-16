@@ -18,9 +18,12 @@ DataHost : encryptedIndecies : dict
 DataHost : encryptedTableAttributes : dict
 DataHost : EncryptedDatabase
 DataHost : UploadIndex (index)
-DataHost : registerNewTable (tableName, attributes)
-DataHost : addNewValuesToTable ()
+DataHost : Register (tableName, attributes)
+DataHost : addReader(readerId, readerKey)
+DataHost : EncryptTable(database, tableName, k, secretKey, realTableName)
+DataHost : UploadValues (tableName, values)
 DataHost : Search (trapdoor)
+
 
 QueryMultiplexer : writers : list
 QueryMultiplexer : readers : list
