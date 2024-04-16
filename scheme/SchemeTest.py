@@ -67,7 +67,7 @@ def runMainScheme():
     writer.encrypt()
     endTime = time.time()
     delta = endTime - curTime
-    logAction([str(delta)], "time for 10000 records")
+    # logAction([str(delta)], "time for 10000 records")
     writer2.encrypt()
 
     # endTime = time.time()
